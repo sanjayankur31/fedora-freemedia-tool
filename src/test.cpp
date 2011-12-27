@@ -1,0 +1,52 @@
+/*
+ * =====================================================================================
+ *
+ *  Copyright 2011 Ankur Sinha
+ *
+ *  This program is free software: you can redistribute it and/or modify 
+ *  it under the terms of the GNU General Public License as published by 
+ *  the Free Software Foundation, either version 3 of the License, or 
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, 
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License 
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ *       Filename:  test.cpp
+ *
+ *    Description:  a test file to test my classes etc
+ *
+ *
+ *        Version:  1.0
+ *        Created:  23/12/11 17:58:13
+ *       Revision:  none
+ *       Compiler:  g++
+ *
+ *         Author:  Ankur Sinha (FranciscoD), sanjay DOT ankur AT gmail DOT com
+ *        Company:  None
+ *
+ * =====================================================================================
+ */
+
+
+#include	"ImportData.h"
+
+/* 
+ * ===  FUNCTION  ======================================================================
+ *         Name:  main
+ *  Description:  
+ * =====================================================================================
+ */
+int
+main ( int argc, char *argv[] )
+{
+    ImportData newInstance;
+    newInstance.ImportDataToDatabase("");
+
+    return EXIT_SUCCESS;
+}				/* ----------  end of function main  ---------- */
