@@ -23,7 +23,7 @@
  *
  *        Version:  1.0
  *        Created:  23/12/11 17:41:06
- *       Revision:  1
+ *       Revision:  2
  *       Compiler:  g++
  *
  *         Author:  Ankur Sinha (FranciscoD), sanjay DOT ankur AT gmail DOT com
@@ -247,7 +247,10 @@ ImportData::ImportDataToDatabase ()
                  *
                  *  I'm using this flag to prevent it from breaking up
                  *  my address. I'll break it up myself since I want
-                 *  it to be five lines only */
+                 *  it to be five lines only 
+                 *
+                 *  May sometimes need manual intervention
+                 */
                 if(*string_iterator == '"')
                     in_address = !in_address;
                 if(*string_iterator == ',' && !in_address)
@@ -268,10 +271,15 @@ ImportData::ImportDataToDatabase ()
             std::cout << "SQL statement is: " << insert_statement << std::endl;
 
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
-            if(sqlite_return_value != SQLITE_OK)
+            /*  duplicate entries */
+            if(sqlite_return_value == SQLITE_CONSTRAINT)
+            {
+                std::cout << "Ticket already exists in table, skipping." << std::endl;
+            }
+            else if(sqlite_return_value != SQLITE_OK)
             {
                 std::cout << "Error inserting data to table in database. Please file a bug.." << std::endl;
-                std::cout << "SQlite error description: " << error_message << std::endl;
+                std::cout << "SQlite error description: " << sqlite_return_value << ": " << error_message << std::endl;
                 sqlite3_free(error_message);
             }
         }
@@ -391,7 +399,8 @@ ImportData::MediaCode ( std::string stringMediaName )
  *--------------------------------------------------------------------------------------
  *       Class:  ImportData
  *      Method:  ImportData :: replaceAll
- * Description:  My replace string
+ * Description:  My replace string routine. Not using boost to keep
+ * deps to a minimum. May later use.
  *
  * http://stackoverflow.com/questions/3418231/c-replace-part-of-a-string-with-another-string
  *--------------------------------------------------------------------------------------
