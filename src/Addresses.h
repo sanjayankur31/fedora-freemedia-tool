@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *  Copyright 2011 Ankur Sinha
+ *  Copyright 2012 Ankur Sinha
  *
  *  This program is free software: you can redistribute it and/or modify 
  *  it under the terms of the GNU General Public License as published by 
@@ -16,12 +16,12 @@
  *  You should have received a copy of the GNU General Public License 
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *       Filename:  ImportData.h
+ *       Filename:  Addresses.h
  *
- *    Description:  Header
+ *    Description:  
  *
  *        Version:  1.0
- *        Created:  23/12/11 17:41:06
+ *        Created:  06/01/12 23:28:37
  *       Revision:  1
  *       Compiler:  g++
  *
@@ -31,45 +31,28 @@
  * =====================================================================================
  */
 
-/*  Include guard  */
-#ifndef  IMPORTDATA_INC
-#define  IMPORTDATA_INC
 
+#ifndef  ADDRESSES_INC
+#define  ADDRESSES_INC
 
-#include	<sys/stat.h>
-#include	<sys/types.h>
-#include	<errno.h>
-#include	<iostream>
-#include	<fstream>
-#include	<string>
-#include	<cstdlib>
-#include	<cctype>
-#include	<sqlite3.h>
-#include	<vector>
+#include	<Magick++.h>
 
 
 /*
  * =====================================================================================
- *        Class:  ImportData
- *  Description:  Import data to the database
+ *        Class:  Addresses
+ *  Description:  
  * =====================================================================================
  */
-class ImportData
+class Addresses
 {
     public:
     /* ====================  LIFECYCLE     ======================================= */
-    ImportData ();                             /* constructor */
+    Addresses ();                             /* constructor */
 
     /* ====================  ACCESSORS     ======================================= */
 
     /* ====================  MUTATORS      ======================================= */
-    void ImportDataToDatabase();
-    void ImportDataToDatabase(std::string filenameWithPath);
-    std::string SanitizeSummary(std::string summaryToStrip);
-    std::string ReplaceAll(std::string str,const std::string from, const std::string to);
-    std::string MediaCode(std::string stringMediaName);
-    std::string SanitizeAddress(std::string addressToSanitize);
-    std::string ToSentenceCase(std::string textToModify);
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -78,28 +61,17 @@ class ImportData
 
     private:
     /* ====================  DATA MEMBERS  ======================================= */
-    std::string mConfigDirectory;
-    std::string mUserDataDirectory;
-    std::string mDataFile;
-    std::string mConfigFile;
-    std::string mDatabaseFile;
-    sqlite3 *mpDatabaseHandle;
-    bool mAllGood;
-    std::ifstream mDataFileHandle; 
+    std::string mToAddressLine1;
+    std::string mToAddressLine2;
+    std::string mToAddressLine3;
+    std::string mToAddressLine4;
+    std::string mToAddressLine5;
+    std::string mFromAddressLine1;
+    std::string mFromAddressLine2;
+    std::string mFromAddressLine3;
+    std::string mFromAddressLine4;
+    std::string mFromAddressLine5;
 
-}; /* -----  end of class ImportData  ----- */
+}; /* -----  end of class Addresses  ----- */
 
-
-#endif   /* ----- #ifndef IMPORTDATA_INC  ----- */
-
-
-/*  token order 
- * 1. status: discard
- * 2. ticket number: use
- * 3. summary: extract name
- * 4. Timestamp: discard
- * 5. Timestamp: discard
- * 6. Complete address: break into 5 address lines and request user to
- * check
- */
-
+#endif   /* ----- #ifndef ADDRESSES_INC  ----- */

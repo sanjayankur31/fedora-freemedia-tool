@@ -155,7 +155,7 @@ ImportData::ImportData ()
         sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
         if(sqlite_return_value == SQLITE_OK)
         {
-            std::string create_table_query = "CREATE TABLE FREEMEDIA (TICKET_NUMBER INTEGER, NAME VARCHAR2(100), ADDRESS_COMPLETE VARCHAR2(500), ADDRESS_LINE1 VARCHAR2(75), ADDRESS_LINE2 VARCHAR2(75), ADDRESS_LINE3 VARCHAR2(75), ADDRESS_LINE4 VARCHAR2(75), ADDRESS_LINE5 VARCHAR2(75), REQUIREMENT INTEGER, STATUS INTEGER, SERVICE_DATE DATE, PRIMARY KEY (TICKET_NUMBER));";
+            std::string create_table_query = "CREATE TABLE FREEMEDIA (TICKET_NUMBER INTEGER, NAME VARCHAR2(100), ADDRESS_COMPLETE VARCHAR2(500), REQUIREMENT INTEGER, STATUS INTEGER, SERVICE_DATE DATE, PRIMARY KEY (TICKET_NUMBER));";
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, create_table_query.c_str(), dummy_callback_function, 0, &error_message);
             if(sqlite_return_value != SQLITE_OK)
             {
@@ -267,7 +267,7 @@ ImportData::ImportDataToDatabase ()
                 }
             }
             /*  using % as a place holder for a \c\r */
-            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + replaceAll(string_tokens[6],"[[BR]]"," % ") + "', '', '', '', '', '', " + MediaCode(string_tokens[3]) + ", 1, '');";
+            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + ReplaceAll(string_tokens[6],"[[BR]]"," % ") + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
             std::cout << "SQL statement is: " << insert_statement << std::endl;
 
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
@@ -398,7 +398,7 @@ ImportData::MediaCode ( std::string stringMediaName )
 /*
  *--------------------------------------------------------------------------------------
  *       Class:  ImportData
- *      Method:  ImportData :: replaceAll
+ *      Method:  ImportData :: ReplaceAll
  * Description:  My replace string routine. Not using boost to keep
  * deps to a minimum. May later use.
  *
@@ -406,7 +406,7 @@ ImportData::MediaCode ( std::string stringMediaName )
  *--------------------------------------------------------------------------------------
  */
 std::string
-ImportData::replaceAll(std::string str, const std::string from, const std::string to) 
+ImportData::ReplaceAll(std::string str, const std::string from, const std::string to) 
 {
     size_t start_pos = 0;
     while((start_pos = str.find(from, start_pos)) != std::string::npos) 
@@ -415,4 +415,5 @@ ImportData::replaceAll(std::string str, const std::string from, const std::strin
         start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
     }
     return str;
-}       /* ----- end of method ImportData::replaceAll  ----- */
+}       /* ----- end of method ImportData::ReplaceAll  ----- */
+

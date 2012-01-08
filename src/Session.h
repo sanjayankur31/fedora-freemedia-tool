@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *  Copyright 2011 Ankur Sinha
+ *  Copyright 2012 Ankur Sinha
  *
  *  This program is free software: you can redistribute it and/or modify 
  *  it under the terms of the GNU General Public License as published by 
@@ -16,12 +16,12 @@
  *  You should have received a copy of the GNU General Public License 
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *       Filename:  ImportData.h
+ *       Filename:  Session.h
  *
- *    Description:  Header
+ *    Description:  
  *
  *        Version:  1.0
- *        Created:  23/12/11 17:41:06
+ *        Created:  07/01/12 14:20:04
  *       Revision:  1
  *       Compiler:  g++
  *
@@ -31,45 +31,34 @@
  * =====================================================================================
  */
 
-/*  Include guard  */
-#ifndef  IMPORTDATA_INC
-#define  IMPORTDATA_INC
 
+#ifndef  SESSION_INC
+#define  SESSION_INC
 
-#include	<sys/stat.h>
-#include	<sys/types.h>
-#include	<errno.h>
-#include	<iostream>
-#include	<fstream>
+#include <boost/program_options.hpp>
 #include	<string>
-#include	<cstdlib>
-#include	<cctype>
-#include	<sqlite3.h>
-#include	<vector>
-
 
 /*
  * =====================================================================================
- *        Class:  ImportData
- *  Description:  Import data to the database
+ *        Class:  Session
+ *  Description:  Data related to the application's currently running
+ *  session
  * =====================================================================================
  */
-class ImportData
+class Session
 {
     public:
     /* ====================  LIFECYCLE     ======================================= */
-    ImportData ();                             /* constructor */
+    Session ();                             /* constructor */
 
     /* ====================  ACCESSORS     ======================================= */
+    std::string DatabaseFileLocation();
+    std::string InputReportFileLocation();
+    std::string OutputDirectory();
+    int VerboseLevel();
 
     /* ====================  MUTATORS      ======================================= */
-    void ImportDataToDatabase();
-    void ImportDataToDatabase(std::string filenameWithPath);
-    std::string SanitizeSummary(std::string summaryToStrip);
-    std::string ReplaceAll(std::string str,const std::string from, const std::string to);
-    std::string MediaCode(std::string stringMediaName);
-    std::string SanitizeAddress(std::string addressToSanitize);
-    std::string ToSentenceCase(std::string textToModify);
+    int ParseCommandLine(int argc, char **argv);
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -78,28 +67,14 @@ class ImportData
 
     private:
     /* ====================  DATA MEMBERS  ======================================= */
-    std::string mConfigDirectory;
-    std::string mUserDataDirectory;
-    std::string mDataFile;
-    std::string mConfigFile;
-    std::string mDatabaseFile;
-    sqlite3 *mpDatabaseHandle;
-    bool mAllGood;
-    std::ifstream mDataFileHandle; 
+    std::string mDatabaseFileLocation;
+    std::string mInputReportFileLocation;
+    std::string mOutputDirectory;
+    int mVerboseLevel;
+    boost::program_options::variables_map mVariableMap;
+    boost::program_options::options_description mDesc;
 
-}; /* -----  end of class ImportData  ----- */
+}; /* -----  end of class Session  ----- */
 
 
-#endif   /* ----- #ifndef IMPORTDATA_INC  ----- */
-
-
-/*  token order 
- * 1. status: discard
- * 2. ticket number: use
- * 3. summary: extract name
- * 4. Timestamp: discard
- * 5. Timestamp: discard
- * 6. Complete address: break into 5 address lines and request user to
- * check
- */
-
+#endif   /* ----- #ifndef SESSION_INC  ----- */

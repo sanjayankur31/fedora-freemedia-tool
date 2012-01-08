@@ -35,6 +35,7 @@
 
 
 #include	"ImportData.h"
+#include	"Session.h"
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -45,6 +46,14 @@
 int
 main ( int argc, char *argv[] )
 {
+    Session currentSession; 
+    if (currentSession.ParseCommandLine(argc, argv) == -1)
+       return EXIT_SUCCESS;
+
+    std::cout << "Output directory entered is: " << currentSession.OutputDirectory() << std::endl;
+    std::cout << "Input report file location is: " <<  currentSession.InputReportFileLocation() << std::endl;
+    std::cout << "Database file location is: " <<  currentSession.DatabaseFileLocation() << std::endl;
+
     ImportData newInstance;
     newInstance.ImportDataToDatabase("");
 

@@ -17,10 +17,23 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 
-
-PKG_CHECK_MODULES(PACKAGE, sqlite3)
+PKG_CHECK_MODULES(PACKAGE, sqlite3 Magick++ libconfig++)
 AC_SUBST(PACKAGE_CFLAGS)
 AC_SUBST(PACKAGE_LIBS)
+
+dnl add boost
+AC_ARG_WITH([boost-include-path],
+            [AS_HELP_STRING([--with-boost-include-path],
+                            [location of the boost headers, defaults to /usr/include/boost])],
+                            [BOOST_CFLAGS="-I$withval"],
+                            [BOOST_CFLAGS='-I/usr/include/boost'])
+AC_SUBST([BOOST_CFLAGS])
+
+AC_ARG_WITH([boost-lib-path],
+            [AS_HELP_STRING([--with-boost-lib-path], [location of the boost libraries])],
+            [BOOST_LIBS="-L$withval -lboost_program_options"],
+            [BOOST_LIBS='-lboost_program_options'])
+AC_SUBST([BOOST_LIBS])
 
 AC_CONFIG_FILES([Makefile src/Makefile])    
 AC_OUTPUT

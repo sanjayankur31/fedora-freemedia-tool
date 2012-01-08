@@ -46,7 +46,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_test_OBJECTS = test-ImportData.$(OBJEXT) test-test.$(OBJEXT)
+am_test_OBJECTS = test-ImportData.$(OBJEXT) test-test.$(OBJEXT) \
+	test-Session.$(OBJEXT)
 test_OBJECTS = $(am_test_OBJECTS)
 test_LDADD = $(LDADD)
 test_LINK = $(CXXLD) $(test_CXXFLAGS) $(CXXFLAGS) $(test_LDFLAGS) \
@@ -76,6 +77,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BOOST_CFLAGS = @BOOST_CFLAGS@
+BOOST_LIBS = @BOOST_LIBS@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXDEPMODE = @CXXDEPMODE@
@@ -159,10 +162,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-test_SOURCES = ImportData.cpp ImportData.h test.cpp
-noinst_HEADERS = ImportData.h
-test_CXXFLAGS = @PACKAGE_CFLAGS@
-test_LDFLAGS = @PACKAGE_LIBS@
+test_SOURCES = ImportData.cpp ImportData.h test.cpp \
+			   Session.cpp Session.h
+
+noinst_HEADERS = ImportData.h Session.h
+test_CXXFLAGS = @PACKAGE_CFLAGS@ @BOOST_CFLAGS@
+test_LDFLAGS = @PACKAGE_LIBS@ @BOOST_LIBS@
 all: all-am
 
 .SUFFIXES:
@@ -245,6 +250,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-ImportData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-Session.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-test.Po@am__quote@
 
 .cpp.o:
@@ -288,6 +294,20 @@ test-test.obj: test.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='test-test.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
+
+test-Session.o: Session.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-Session.o -MD -MP -MF $(DEPDIR)/test-Session.Tpo -c -o test-Session.o `test -f 'Session.cpp' || echo '$(srcdir)/'`Session.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-Session.Tpo $(DEPDIR)/test-Session.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Session.cpp' object='test-Session.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-Session.o `test -f 'Session.cpp' || echo '$(srcdir)/'`Session.cpp
+
+test-Session.obj: Session.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-Session.obj -MD -MP -MF $(DEPDIR)/test-Session.Tpo -c -o test-Session.obj `if test -f 'Session.cpp'; then $(CYGPATH_W) 'Session.cpp'; else $(CYGPATH_W) '$(srcdir)/Session.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-Session.Tpo $(DEPDIR)/test-Session.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Session.cpp' object='test-Session.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-Session.obj `if test -f 'Session.cpp'; then $(CYGPATH_W) 'Session.cpp'; else $(CYGPATH_W) '$(srcdir)/Session.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
