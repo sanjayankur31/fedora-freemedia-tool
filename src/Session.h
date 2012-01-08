@@ -69,10 +69,14 @@ class Session
     /* ====================  DATA MEMBERS  ======================================= */
     std::string mDatabaseFileLocation;
     std::string mInputReportFileLocation;
+    std::string mConfigFileLocation;
     std::string mOutputDirectory;
+    std::string mSendersAddress;
+    std::string mSendersName;
     int mVerboseLevel;
     boost::program_options::variables_map mVariableMap;
     boost::program_options::options_description mDesc;
+
 
 }; /* -----  end of class Session  ----- */
 

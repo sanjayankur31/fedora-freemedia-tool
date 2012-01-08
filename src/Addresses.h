@@ -36,6 +36,7 @@
 #define  ADDRESSES_INC
 
 #include	<Magick++.h>
+#include	<sqlite3.h>
 
 
 /*
@@ -55,22 +56,17 @@ class Addresses
     /* ====================  MUTATORS      ======================================= */
 
     /* ====================  OPERATORS     ======================================= */
+    int PrintToAddressOnEnvelope(); /* crucial method */
+    int PrintFromAddressOnEnvelope(); /* crucial method */
 
     protected:
     /* ====================  DATA MEMBERS  ======================================= */
 
     private:
     /* ====================  DATA MEMBERS  ======================================= */
-    std::string mToAddressLine1;
-    std::string mToAddressLine2;
-    std::string mToAddressLine3;
-    std::string mToAddressLine4;
-    std::string mToAddressLine5;
-    std::string mFromAddressLine1;
-    std::string mFromAddressLine2;
-    std::string mFromAddressLine3;
-    std::string mFromAddressLine4;
-    std::string mFromAddressLine5;
+    std::string mToAddress;
+    std::string mFromAddress;
+    sqlite3 *mpDatabaseHandle;
 
 }; /* -----  end of class Addresses  ----- */
 

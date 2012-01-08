@@ -328,8 +328,6 @@ ImportData::SanitizeAddress (std::string addressToSanitize)
 //    return strippedAddress;
 }		/* -----  end of method ImportData::SanitizeAddress  ----- */
 
-
-
 /*
  *--------------------------------------------------------------------------------------
  *       Class:  ImportData
@@ -393,8 +391,6 @@ ImportData::MediaCode ( std::string stringMediaName )
 
 }		/* -----  end of method ImportData::MediaCode  ----- */
 
-
-
 /*
  *--------------------------------------------------------------------------------------
  *       Class:  ImportData
@@ -416,4 +412,5 @@ ImportData::ReplaceAll(std::string str, const std::string from, const std::strin
     }
     return str;
 }       /* ----- end of method ImportData::ReplaceAll  ----- */
+
 

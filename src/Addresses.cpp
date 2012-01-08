@@ -34,4 +34,17 @@
  */
 
 
+#include	"Addresses.h"
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Addresses
+ *      Method:  Addresses
+ * Description:  constructor
+ *--------------------------------------------------------------------------------------
+ */
+Addresses::Addresses ()
+{
+    int sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+}  /* -----  end of method Addresses::Addresses  (constructor)  ----- */
 

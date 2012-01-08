@@ -45,12 +45,18 @@
 Session::Session ()
     : mDesc("Options")
 {
+    mOutputDirectory = "./";
+    mDatabaseFileLocation = "~/.local/share/fedora-freemedia-tool/freemedia-database.db";
+    mInputReportFileLocation = "~/.local/share/fedora-freemedia-tool/report.csv";
     mDesc.add_options()
-        ("help,h", "print usage message")
-        ("input-file,i",boost::program_options::value<std::string>(&mInputReportFileLocation),"complete input file path\n(default: ~/.local/share/fedora-freemedia-tool/report.csv)")
-        ("database,d",boost::program_options::value<std::string>(&mDatabaseFileLocation),"complete output file path\n(default: ~/.local/share/fedora-freemedia-tool/freemedia-database.db)")
-        ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory),"directory to put the printed envelopes\n(default: ./ (current directory))")
+        ("help,h", "Print this usage message")
+        ("input-file,i",boost::program_options::value<std::string>(&mInputReportFileLocation),"Complete input file path\n(default: ~/.local/share/fedora-freemedia-tool/report.csv)")
+        ("database,d",boost::program_options::value<std::string>(&mDatabaseFileLocation),"Complete output file path\n(default: ~/.local/share/fedora-freemedia-tool/freemedia-database.db)")
+        ("config-file,c",boost::program_options::value<std::string>(&mConfigFileLocation),"Configuration file")
+        ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory),"Directory to put the printed envelopes\n(default: ./ (current directory))")
         ("v-level,v",boost::program_options::value<int>(&mVerboseLevel),"Debug level: 1,2,3\n(default: 0)")
+        ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name")
+        ("sender-add,s",boost::program_options::value<std::string>(&mSendersAddress)->multitoken(),"Senders address")
         ;
 
 }  /* -----  end of method Session::Session  (constructor)  ----- */
