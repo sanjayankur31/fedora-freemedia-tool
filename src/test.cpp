@@ -57,6 +57,7 @@ main ( int argc, char *argv[] )
     std::cout << "Output directory entered is: " << currentSession.OutputDirectory() << std::endl;
     std::cout << "Input report file location is: " <<  currentSession.InputReportFileLocation() << std::endl;
     std::cout << "Database file location is: " <<  currentSession.DatabaseFileLocation() << std::endl;
+    std::cout << "Print list is: " << currentSession.PrintListAsString() << std::endl;
 
     ImportData newInstance(currentSession.InputReportFileLocation(),currentSession.DatabaseFileLocation());
     newInstance.ImportDataToDatabase("");

@@ -56,6 +56,7 @@ Session::Session ()
         ("input-file,i",boost::program_options::value<std::string>(&mInputReportFileLocation),"Complete input file path\n(default: ~/.local/share/fedora-freemedia-tool/report.csv)")
         ("database,d",boost::program_options::value<std::string>(&mDatabaseFileLocation),"Complete output file path\n(default: ~/.local/share/fedora-freemedia-tool/freemedia-database.db)")
         ("config-file,c",boost::program_options::value<std::string>(&mConfigFileLocation),"Configuration file")
+        ("print,p",boost::program_options::value< std::vector<int> >(&mPrintList)->multitoken(),"List of records to print envelopes for")
         ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory),"Directory to put the printed envelopes\n(default: ./ (current directory))")
         ("v-level,v",boost::program_options::value<int>(&mVerboseLevel),"Debug level: 1,2,3\n(default: 0)")
         ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name")
@@ -207,4 +208,18 @@ Session::PrepareSession ( )
     /*  all directories set up */
     return 0;
 }		/* -----  end of method Session::PrepareSession  ----- */
+
+
+    std::string
+Session::PrintListAsString ( )
+{
+    std::string ret_val = "";
+    char temp[50];
+    for (int i = 0; i < mPrintList.size(); i++)
+    {
+        sprintf(temp,"%d",mPrintList[i]);
+        ret_val += std::string(temp) + ",";
+    }
+    return ret_val;
+}		/* -----  end of method Session::PrintList  ----- */
 

@@ -41,6 +41,8 @@
 #include	<string>
 #include	<cstdlib>
 #include	<errno.h>
+#include	<vector>
+#include	<cstdio>
 
 /*
  * =====================================================================================
@@ -59,6 +61,7 @@ class Session
     std::string DatabaseFileLocation();
     std::string InputReportFileLocation();
     std::string OutputDirectory();
+    std::string PrintListAsString();
     int VerboseLevel();
 
     /* ====================  MUTATORS      ======================================= */
@@ -80,6 +83,7 @@ class Session
     std::string mOutputDirectory;
     std::string mSendersAddress;
     std::string mSendersName;
+    std::vector<int> mPrintList;
     int mVerboseLevel;
     boost::program_options::variables_map mVariableMap;
     boost::program_options::options_description mDesc;

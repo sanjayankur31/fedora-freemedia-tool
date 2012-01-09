@@ -158,7 +158,7 @@ ImportData::ImportDataToDatabase ()
         while(mDataFileHandle.good() && !mDataFileHandle.eof())
         {
             in_address = false;
-            std::cout << "Got a new line now.." << std::endl;
+//            std::cout << "Got a new line now.." << std::endl;
             string_tokens.clear();
             temp_buffer.clear();
             getline(mDataFileHandle,temp_buffer);
@@ -201,13 +201,13 @@ ImportData::ImportDataToDatabase ()
             }
             /*  using % as a place holder for a \c\r */
             std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + ReplaceAll(string_tokens[6],"[[BR]]"," % ") + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
-            std::cout << "SQL statement is: " << insert_statement << std::endl;
+//            std::cout << "SQL statement is: " << insert_statement << std::endl;
 
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
             /*  duplicate entries */
             if(sqlite_return_value == SQLITE_CONSTRAINT)
             {
-                std::cout << "Ticket already exists in table, skipping." << std::endl;
+                std::cout << "Ticket " + string_tokens[1] + " already exists in table, skipping." << std::endl;
             }
             else if(sqlite_return_value != SQLITE_OK)
             {
