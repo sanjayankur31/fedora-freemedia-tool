@@ -45,9 +45,12 @@
 Session::Session ()
     : mDesc("Options")
 {
+    std::string home_dir ((const char *)getenv("HOME"));
     mOutputDirectory = "./";
-    mDatabaseFileLocation = "~/.local/share/fedora-freemedia-tool/freemedia-database.db";
-    mInputReportFileLocation = "~/.local/share/fedora-freemedia-tool/report.csv";
+    mConfigDirectory = home_dir + "/" + ".config/fedora-freemedia-tool/";
+    mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
+    mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
+    mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
     mDesc.add_options()
         ("help,h", "Print this usage message")
         ("input-file,i",boost::program_options::value<std::string>(&mInputReportFileLocation),"Complete input file path\n(default: ~/.local/share/fedora-freemedia-tool/report.csv)")
@@ -135,4 +138,73 @@ Session::VerboseLevel ( )
 {
     return mVerboseLevel;
 }		/* -----  end of method Session::VerboseLevel  ----- */
+
+
+    int
+Session::PrepareSession ( )
+{
+    std::string home_dir ((const char *)getenv("HOME"));
+    std::string conf_dir = home_dir + "/.config/";
+    std::string user_dir = home_dir + "/.local/share/";
+
+    /*  make directories if not already present 
+     *  continue if already present
+     */
+    if(mkdir(conf_dir.c_str(), 0700) == -1)
+    {
+        if(errno !=  EEXIST)
+        {
+            std::cout << "Error creating ~/.conf directory. Please report a bug" << std::endl;
+            return -1;
+        }
+        else
+        {
+            if(mkdir(mConfigDirectory.c_str(), 0700) == -1)
+            {
+                if(errno != EEXIST)
+                {
+                    std::cout << "Error creating " << mConfigDirectory << " directory. Please report a bug" << std::endl;
+                    return -1;
+                }
+                else
+                    std::cout << mConfigDirectory << " already exists. Continuing.." << std::endl;
+            }
+            else
+            {
+                    std::cout << "Creating " << mConfigDirectory << " directory.." << std::endl;
+
+            }
+        }
+
+    }
+
+    if(mkdir(user_dir.c_str(), 0700) == -1)
+    {
+        if(errno != EEXIST)
+        {
+            std::cout << "Error creating ~/.local/share directory. Please report a bug" << std::endl;
+            return -1;
+        }
+        else 
+        {
+            if(mkdir(mUserDataDirectory.c_str(), 0700) == -1)
+            {
+                if(errno != EEXIST)
+                {
+                    std::cout << "Error creating " << mUserDataDirectory << " directory. Please report a bug" << std::endl;
+                    return -1;
+                }
+                else
+                    std::cout << mUserDataDirectory << " already exists. Continuing.." << std::endl;
+            }
+            else
+            {
+                    std::cout << "Creating " << mUserDataDirectory << " directory.." << std::endl;
+
+            }
+        }
+    }
+    /*  all directories set up */
+    return 0;
+}		/* -----  end of method Session::PrepareSession  ----- */
 

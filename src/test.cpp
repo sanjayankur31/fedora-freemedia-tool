@@ -47,6 +47,10 @@ int
 main ( int argc, char *argv[] )
 {
     Session currentSession; 
+    if(currentSession.PrepareSession() == -1)
+    {
+        return EXIT_FAILURE;
+    }
     if (currentSession.ParseCommandLine(argc, argv) == -1)
        return EXIT_SUCCESS;
 
@@ -54,7 +58,7 @@ main ( int argc, char *argv[] )
     std::cout << "Input report file location is: " <<  currentSession.InputReportFileLocation() << std::endl;
     std::cout << "Database file location is: " <<  currentSession.DatabaseFileLocation() << std::endl;
 
-    ImportData newInstance;
+    ImportData newInstance(currentSession.InputReportFileLocation(),currentSession.DatabaseFileLocation());
     newInstance.ImportDataToDatabase("");
 
     return EXIT_SUCCESS;

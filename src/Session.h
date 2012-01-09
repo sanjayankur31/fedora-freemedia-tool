@@ -35,8 +35,12 @@
 #ifndef  SESSION_INC
 #define  SESSION_INC
 
-#include <boost/program_options.hpp>
+#include    <boost/program_options.hpp>
+#include	<sys/stat.h>
+#include	<sys/types.h>
 #include	<string>
+#include	<cstdlib>
+#include	<errno.h>
 
 /*
  * =====================================================================================
@@ -59,6 +63,7 @@ class Session
 
     /* ====================  MUTATORS      ======================================= */
     int ParseCommandLine(int argc, char **argv);
+    int PrepareSession();                       /* make the required directories etc */
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -67,6 +72,8 @@ class Session
 
     private:
     /* ====================  DATA MEMBERS  ======================================= */
+    std::string mConfigDirectory;
+    std::string mUserDataDirectory;
     std::string mDatabaseFileLocation;
     std::string mInputReportFileLocation;
     std::string mConfigFileLocation;

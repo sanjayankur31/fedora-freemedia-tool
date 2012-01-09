@@ -36,13 +36,9 @@
 #define  IMPORTDATA_INC
 
 
-#include	<sys/stat.h>
-#include	<sys/types.h>
-#include	<errno.h>
 #include	<iostream>
 #include	<fstream>
 #include	<string>
-#include	<cstdlib>
 #include	<cctype>
 #include	<sqlite3.h>
 #include	<vector>
@@ -58,7 +54,7 @@ class ImportData
 {
     public:
     /* ====================  LIFECYCLE     ======================================= */
-    ImportData ();                             /* constructor */
+    ImportData (std::string dataFile, std::string databaseFile);                             /* constructor */
 
     /* ====================  ACCESSORS     ======================================= */
 
@@ -78,8 +74,6 @@ class ImportData
 
     private:
     /* ====================  DATA MEMBERS  ======================================= */
-    std::string mConfigDirectory;
-    std::string mUserDataDirectory;
     std::string mDataFile;
     std::string mConfigFile;
     std::string mDatabaseFile;

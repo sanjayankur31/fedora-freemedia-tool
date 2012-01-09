@@ -54,96 +54,28 @@ dummy_callback_function (void *notUsed, int argc, char **argv, char **columnName
  * Description:  constructor
  *--------------------------------------------------------------------------------------
  */
-ImportData::ImportData ()
+ImportData::ImportData (std::string dataFile, std::string databaseFile)
 {
     mAllGood = true;
-    std::string home_dir ((const char *)getenv("HOME"));
-    std::string conf_dir = home_dir + "/.config/";
-    std::string user_dir = home_dir + "/.local/share/";
-    mConfigDirectory = home_dir + "/" + ".config/fedora-freemedia-tool/";
-    mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     int sqlite_return_value = 0;
     char* error_message;
 //    std::cout << home_dir << std::endl << mConfigDirectory << std::endl << mUserDataDirectory << std::endl;
 
-
-    /*  make directories if not already present 
-     *  continue if already present
-     */
-    if(mkdir(conf_dir.c_str(), 0700) == -1)
-    {
-        if(errno !=  EEXIST)
-        {
-            std::cout << "Error creating ~/.conf directory. Please report a bug" << std::endl;
-            mAllGood = false;
-        }
-        else
-        {
-            if(mkdir(mConfigDirectory.c_str(), 0700) == -1)
-            {
-                if(errno != EEXIST)
-                {
-                    std::cout << "Error creating " << mConfigDirectory << " directory. Please report a bug" << std::endl;
-                    mAllGood = false;
-                }
-                else
-                    std::cout << mConfigDirectory << " already exists. Continuing.." << std::endl;
-            }
-            else
-            {
-                    std::cout << "Creating " << mConfigDirectory << " directory.." << std::endl;
-
-            }
-        }
-
-    }
-
-    if(mkdir(user_dir.c_str(), 0700) == -1)
-    {
-        if(errno != EEXIST)
-        {
-            std::cout << "Error creating ~/.local/share directory. Please report a bug" << std::endl;
-            mAllGood = false;
-        }
-        else 
-        {
-            if(mkdir(mUserDataDirectory.c_str(), 0700) == -1)
-            {
-                if(errno != EEXIST)
-                {
-                    std::cout << "Error creating " << mUserDataDirectory << " directory. Please report a bug" << std::endl;
-                    mAllGood = false;
-                }
-                else
-                    std::cout << mUserDataDirectory << " already exists. Continuing.." << std::endl;
-            }
-            else
-            {
-                    std::cout << "Creating " << mUserDataDirectory << " directory.." << std::endl;
-
-            }
-        }
-    }
-    /*  all directories set up */
-
-    /*  check for data file
-     *
+    mDataFile = dataFile;
+    std::cout << "Datafile set to: " << mDataFile << std::endl;
+    mDatabaseFile = databaseFile;
+    std::cout << "Databasefile set to: " << mDatabaseFile << std::endl;
+     /*
      *  - csv, tsv
      *  TODO: xml */
 
-    /*  set to default name */
-    /*  DEFAULT NAME = report.csv */
-    mDataFile = mUserDataDirectory + "report.csv";
     
-    /*  set up database file */
-    mDatabaseFile = mUserDataDirectory + "freemedia-database.db";
-
     /*  initialize database connection 
      *  TODO: do we use the same handle for all transactions or do we
      *  make handles as and when required and destroy them?
      *
      *  Check if database file exists, and act accordingly*/
-    std::ifstream temporary_stream(mDatabaseFile.c_str());
+    std::ifstream temporary_stream(databaseFile.c_str());
     if(temporary_stream)
     {
         std::cout << "Database already exists. Continuing.." << std::endl;
@@ -152,7 +84,7 @@ ImportData::ImportData ()
     else
     {
         std::cout << "Database does not exist. Creating.." << std::endl;
-        sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+        sqlite_return_value = sqlite3_open(databaseFile.c_str(), &mpDatabaseHandle);
         if(sqlite_return_value == SQLITE_OK)
         {
             std::string create_table_query = "CREATE TABLE FREEMEDIA (TICKET_NUMBER INTEGER, NAME VARCHAR2(100), ADDRESS_COMPLETE VARCHAR2(500), REQUIREMENT INTEGER, STATUS INTEGER, SERVICE_DATE DATE, PRIMARY KEY (TICKET_NUMBER));";
@@ -213,6 +145,7 @@ ImportData::ImportDataToDatabase ()
     {
 
         std::cout << "Error opening database file.. Please file a bug." << std::endl;
+        std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
         return;
     }
     std::cout << "Entered worker import function.." << std::endl;
