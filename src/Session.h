@@ -35,6 +35,8 @@
 #ifndef  SESSION_INC
 #define  SESSION_INC
 
+
+#include	"config.h"
 #include    <boost/program_options.hpp>
 #include	<sys/stat.h>
 #include	<sys/types.h>
@@ -83,7 +85,10 @@ class Session
     std::string mOutputDirectory;
     std::string mSendersAddress;
     std::string mSendersName;
-    std::vector<int> mPrintList;
+    std::string mListWhat;
+    std::string mListLongWhat;
+    std::string mEnvelopeTemplateLocation;
+    std::vector<int> mListToPrint;
     int mVerboseLevel;
     boost::program_options::variables_map mVariableMap;
     boost::program_options::options_description mDesc;

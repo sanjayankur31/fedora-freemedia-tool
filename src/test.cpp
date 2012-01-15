@@ -35,6 +35,8 @@
 
 
 #include	"ImportData.h"
+
+#include	"ExportData.h"
 #include	"Session.h"
 
 /* 
@@ -61,6 +63,14 @@ main ( int argc, char *argv[] )
 
     ImportData newInstance(currentSession.InputReportFileLocation(),currentSession.DatabaseFileLocation());
     newInstance.ImportDataToDatabase("");
+
+    ExportData newExportInstance(currentSession.DatabaseFileLocation(),currentSession.OutputDirectory());
+    newExportInstance.GetAllTicketNumbers();
+    newExportInstance.PrintAllTicketNumbers();
+    newExportInstance.GetPendingTicketNumbers();
+    newExportInstance.PrintPendingTicketNumbers();
+    newExportInstance.GetCompleteTicketNumbers();
+    newExportInstance.PrintCompleteTicketNumbers();
 
     return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

@@ -120,11 +120,11 @@ ImportData::ImportData (std::string dataFile, std::string databaseFile)
  *--------------------------------------------------------------------------------------
  */
 void
-ImportData::ImportDataToDatabase (std::string filenameWithPath)
+ImportData::ImportDataToDatabase (std::string dataFilenameWithPath)
 {
-    if(!filenameWithPath.empty())
+    if(!dataFilenameWithPath.empty())
     {
-        mDataFile = filenameWithPath;
+        mDataFile = dataFilenameWithPath;
     }
     std::cout << "Using datafile: " << mDataFile << std::endl;
     ImportDataToDatabase();
@@ -216,6 +216,10 @@ ImportData::ImportDataToDatabase ()
                 sqlite3_free(error_message);
             }
         }
+    }
+    else
+    {
+        std::cout << "Input file not found! Please recheck the location provided.." << std::endl;
     }
     mDataFileHandle.close();
     sqlite3_close(mpDatabaseHandle);

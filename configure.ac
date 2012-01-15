@@ -11,6 +11,7 @@ AC_INIT([fedora-freemedia-tools],[1.0],[ankursinha@fedoraproject.org], , [http:/
 AM_INIT_AUTOMAKE([-W -Wall -Werror dist-bzip2 dist-zip check-news])
 PACKAGE=fft
 AC_CONFIG_SRCDIR([src/test.cpp])
+AC_CONFIG_HEADER(config.h)
 
 AM_MAINTAINER_MODE    
 AC_PROG_CXX

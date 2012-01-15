@@ -60,7 +60,7 @@ class ImportData
 
     /* ====================  MUTATORS      ======================================= */
     void ImportDataToDatabase();
-    void ImportDataToDatabase(std::string filenameWithPath);
+    void ImportDataToDatabase(std::string dataFilenameWithPath);
     std::string SanitizeSummary(std::string summaryToStrip);
     std::string ReplaceAll(std::string str,const std::string from, const std::string to);
     std::string MediaCode(std::string stringMediaName);
@@ -97,3 +97,9 @@ class ImportData
  * check
  */
 
+/*
+ * status: 
+ * 1 -> new
+ * 2 -> fixed
+ *
+ */

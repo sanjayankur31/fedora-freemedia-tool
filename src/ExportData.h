@@ -16,12 +16,12 @@
  *  You should have received a copy of the GNU General Public License 
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *       Filename:  Addresses.h
+ *       Filename:  ExportData.h
  *
- *    Description:  
+ *    Description:  Header to ExportData.cpp
  *
  *        Version:  1.0
- *        Created:  06/01/12 23:28:37
+ *        Created:  11/01/12 22:24:09
  *       Revision:  1
  *       Compiler:  g++
  *
@@ -32,42 +32,65 @@
  */
 
 
-#ifndef  ADDRESSES_INC
-#define  ADDRESSES_INC
 
-#include	<Magick++.h>
+#ifndef  EXPORTDATA_INC
+#define  EXPORTDATA_INC
+
+
+#include	<vector>
+#include	<string>
+#include	<iostream>
 #include	<sqlite3.h>
-
 
 /*
  * =====================================================================================
- *        Class:  Addresses
- *  Description:  
+ *        Class:  ExportData
+ *  Description:  Export data from the database to various formats
  * =====================================================================================
  */
-class Addresses
+class ExportData
 {
     public:
     /* ====================  LIFECYCLE     ======================================= */
-    Addresses ();                             /* constructor */
+    ExportData (std::string databaseFile, std::string outputDirectory);
 
     /* ====================  ACCESSORS     ======================================= */
+    void PrintAllTicketNumbers();
+    void PrintPendingTicketNumbers();
+    void PrintCompleteTicketNumbers();
 
     /* ====================  MUTATORS      ======================================= */
+    void GetAllTicketsFull();
+    void GetPendingTicketsFull();
+    void GetCompleteTicketsFull();
+    void GetAllTicketNumbers();
+    void GetPendingTicketNumbers();
+    void GetCompleteTicketNumbers();
+    int NumberOfPendingTickets();
+    int NumberOfTotalTickets();
+    int NumberOfCompleteTickets();
+    void PrintTicketSummaryReport();
 
     /* ====================  OPERATORS     ======================================= */
-    int PrintToAddressOnEnvelope(); /* crucial method */
-    int PrintFromAddressOnEnvelope(); /* crucial method */
 
     protected:
     /* ====================  DATA MEMBERS  ======================================= */
 
     private:
+    template <typename I> void PrintVectorContents(std::vector<I> input_vector);
     /* ====================  DATA MEMBERS  ======================================= */
-    std::string mToAddress;
-    std::string mFromAddress;
     sqlite3 *mpDatabaseHandle;
+    sqlite3_stmt *mpStatementHandle;
+    std::string mDatabaseFile;
+    std::string mOutputDirectory;
+    std::vector<int> mAllTicketNumbers;
+    std::vector<int> mPendingTicketNumbers;
+    std::vector<int> mCompleteTicketNumbers;
+    int mNumberOfPendingTickets;
+    int mNumberOfCompleteTickets;
+    int mNumberOfTotalTickets;
 
-}; /* -----  end of class Addresses  ----- */
 
-#endif   /* ----- #ifndef ADDRESSES_INC  ----- */
+}; /* -----  end of class ExportData  ----- */
+
+#endif   /* ----- #ifndef EXPORTDATA_INC  ----- */
