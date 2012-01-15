@@ -41,6 +41,9 @@
 #include	<string>
 #include	<iostream>
 #include	<sqlite3.h>
+#include	<map>
+#include	<cstdio>
+
 
 /*
  * =====================================================================================
@@ -60,9 +63,6 @@ class ExportData
     void PrintCompleteTicketNumbers();
 
     /* ====================  MUTATORS      ======================================= */
-    void GetAllTicketsFull();
-    void GetPendingTicketsFull();
-    void GetCompleteTicketsFull();
     void GetAllTicketNumbers();
     void GetPendingTicketNumbers();
     void GetCompleteTicketNumbers();
@@ -70,6 +70,8 @@ class ExportData
     int NumberOfTotalTickets();
     int NumberOfCompleteTickets();
     void PrintTicketSummaryReport();
+    void GetTicketInfoFromNumber(int ticketNumber); /* This method will get the other data for a passed ticket number from the database on demand */
+    void PrintTicketInfoFromNumber(int ticketNumber);
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -83,9 +85,14 @@ class ExportData
     sqlite3_stmt *mpStatementHandle;
     std::string mDatabaseFile;
     std::string mOutputDirectory;
-    std::vector<int> mAllTicketNumbers;
-    std::vector<int> mPendingTicketNumbers;
-    std::vector<int> mCompleteTicketNumbers;
+    std::vector <int> mAllTicketNumbers;
+    std::vector <int> mPendingTicketNumbers;
+    std::vector <int> mCompleteTicketNumbers;
+    std::map <int, std::string > mNameMap;
+    std::map <int, std::string > mAddressMap;
+    std::map <int, int > mRequirementMap;
+    std::map <int, int > mStatusMap;
+    std::map <int, std::string > mServiceDateMap;
     int mNumberOfPendingTickets;
     int mNumberOfCompleteTickets;
     int mNumberOfTotalTickets;

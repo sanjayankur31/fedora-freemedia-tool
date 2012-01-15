@@ -50,72 +50,12 @@ ExportData::ExportData (std::string databaseFile, std::string outputDirectory)
 }  /* -----  end of method ExportData::ExportData  (constructor)  ----- */
 
 
-
-    void
-ExportData::GetAllTicketsFull ( )
-{
-    int sqlite_return_value = 0;
-    char* error_message;
-    char *dummy;
-    std::vector<std::string> string_vector_return;
-
-    sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
-    if(sqlite_return_value == SQLITE_OK)
-    {
-        std::string select_query = "SELECT * FROM FREEMEDIA;";
-        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,(const char**)&dummy);
-        if(sqlite_return_value == SQLITE_OK)
-        {
-            do
-            {
-                sqlite_return_value = sqlite3_step(mpStatementHandle);
-                if(sqlite_return_value = SQLITE_ERROR)
-                {
-                    std::cout << "Error preparing select query" << std::endl;
-                    std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
-                    sqlite3_close(mpDatabaseHandle);
-                    return;
-
-                }
-                // TODO: put the data someplace
-
-            }while(sqlite_return_value = SQLITE_ROW);
-
-        }
-        else
-        {
-            std::cout << "Error preparing select query" << std::endl;
-            std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
-            sqlite3_close(mpDatabaseHandle);
-        }
-
-    }
-    return ;
-}		/* -----  end of method ExportData::GetAllTicketsFull  ----- */
-
-
-
-    void
-ExportData::GetPendingTicketsFull ( )
-{
-    return ;
-}		/* -----  end of method ExportData::GetPendingTicketsFull  ----- */
-
-
-
-    void
-ExportData::GetCompleteTicketsFull ( )
-{
-    return ;
-}		/* -----  end of method ExportData::GetCompleteTicketsFull  ----- */
-
-
     void
 ExportData::GetAllTicketNumbers ( )
 {
     int sqlite_return_value = 0;
     char* error_message;
-    char *dummy;
+    const char *dummy;
 
     mAllTicketNumbers.clear();
 
@@ -123,7 +63,7 @@ ExportData::GetAllTicketNumbers ( )
     if(sqlite_return_value == SQLITE_OK)
     {
         std::string select_query = "SELECT TICKET_NUMBER FROM FREEMEDIA;";
-        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,(const char**)&dummy);
+        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
         if(sqlite_return_value == SQLITE_OK)
         {
             do
@@ -190,7 +130,7 @@ ExportData::GetPendingTicketNumbers ( )
 {
     int sqlite_return_value = 0;
     char* error_message;
-    char *dummy;
+    const char *dummy;
 
     mPendingTicketNumbers.clear();
 
@@ -198,7 +138,7 @@ ExportData::GetPendingTicketNumbers ( )
     if(sqlite_return_value == SQLITE_OK)
     {
         std::string select_query = "SELECT TICKET_NUMBER FROM FREEMEDIA WHERE STATUS=1;";
-        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,(const char**)&dummy);
+        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
         if(sqlite_return_value == SQLITE_OK)
         {
             do
@@ -210,7 +150,6 @@ ExportData::GetPendingTicketNumbers ( )
                     std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
                     sqlite3_close(mpDatabaseHandle);
                     return;
-
                 }
                 mPendingTicketNumbers.push_back(sqlite3_column_int(mpStatementHandle,0));
             }while(sqlite_return_value != SQLITE_DONE);
@@ -288,7 +227,7 @@ ExportData::GetCompleteTicketNumbers ( )
 {
     int sqlite_return_value = 0;
     char* error_message;
-    char *dummy;
+    const char *dummy;
 
     mCompleteTicketNumbers.clear();
 
@@ -296,7 +235,7 @@ ExportData::GetCompleteTicketNumbers ( )
     if(sqlite_return_value == SQLITE_OK)
     {
         std::string select_query = "SELECT TICKET_NUMBER FROM FREEMEDIA WHERE STATUS=0;";
-        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,(const char**)&dummy);
+        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
         if(sqlite_return_value == SQLITE_OK)
         {
             do
@@ -349,4 +288,101 @@ ExportData::PrintCompleteTicketNumbers ( )
     PrintVectorContents(mCompleteTicketNumbers);
     return ;
 }		/* -----  end of method ExportData::PrintCompleteTicketNumbers  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: GetTicketInfoFromNumber
+ * Description:  This method gets the information for a ticket and
+ * fills up my maps
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::GetTicketInfoFromNumber (int ticketNumber )
+{
+    int sqlite_return_value = 0;
+    char* error_message;
+    const char *dummy;
+    const unsigned char *dummy_string;
+    char ticketNumberString[30];
+    sprintf(ticketNumberString,"%d",ticketNumber);
+
+    mCompleteTicketNumbers.clear();
+
+    sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+    if(sqlite_return_value == SQLITE_OK)
+    {
+        std::string select_query = "SELECT * FROM FREEMEDIA WHERE TICKET_NUMBER=" + std::string(ticketNumberString) + ";";
+        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
+        if(sqlite_return_value == SQLITE_OK)
+        {
+            do
+            {
+                sqlite_return_value = sqlite3_step(mpStatementHandle);
+                if(sqlite_return_value == SQLITE_ERROR)
+                {
+                    std::cout << "Error stepping returned rows" << std::endl;
+                    std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                    sqlite3_close(mpDatabaseHandle);
+                    return;
+
+                }
+                if(mNameMap.find(ticketNumber) == mNameMap.end()) /* if the value isn't already in there! */
+                {
+                    dummy_string = sqlite3_column_text(mpStatementHandle,1);
+                    mNameMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
+                    dummy_string = sqlite3_column_text(mpStatementHandle,2);
+                    mAddressMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
+                    mRequirementMap.insert(std::pair <int, int> (ticketNumber, sqlite3_column_int(mpStatementHandle,3)));
+                    mStatusMap.insert(std::pair <int, int> (ticketNumber, sqlite3_column_int(mpStatementHandle,4)));
+                    dummy_string = sqlite3_column_text(mpStatementHandle,5);
+                    mServiceDateMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
+                }
+            }while(sqlite_return_value != SQLITE_DONE);
+
+        }
+        else
+        {
+            std::cout << "Error preparing select query" << std::endl;
+            std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_close(mpDatabaseHandle);
+        }
+
+    }
+    /*  why is this extra 0 being added? sqlite quirkyness? */
+    mCompleteTicketNumbers.pop_back();
+    mNumberOfCompleteTickets = mCompleteTicketNumbers.size();
+    sqlite3_close(mpDatabaseHandle);
+    return ;
+}		/* -----  end of method ExportData::GetTicketInfoFromNumber  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintTicketInfoFromNumber
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintTicketInfoFromNumber (int ticketNumber )
+{
+    if(mNameMap.find(ticketNumber) == mNameMap.end())
+    {
+        std::cout << "Ticket #" << ticketNumber << " not in map, please retrieve it first." << std::endl;
+    }
+    else
+    {
+        std::cout << "Printing ticket information: " << std::endl;
+        std::cout << "Ticket Number: #" << ticketNumber << std::endl;
+        std::cout << "Requester Name: " << mNameMap[ticketNumber] << std::endl;
+        std::cout << "Requester Address: " << mAddressMap[ticketNumber] << std::endl;
+        std::cout << "Request: " << mRequirementMap[ticketNumber] << std::endl;
+        std::cout << "Status: " << mStatusMap[ticketNumber] << std::endl;
+        std::cout << "Service Date: " << mServiceDateMap[ticketNumber] << std::endl;
+    }
+
+    return ;
+}		/* -----  end of method ExportData::PrintTicketInfoFromNumber  ----- */
 

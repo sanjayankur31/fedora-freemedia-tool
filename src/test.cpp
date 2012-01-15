@@ -71,6 +71,9 @@ main ( int argc, char *argv[] )
     newExportInstance.PrintPendingTicketNumbers();
     newExportInstance.GetCompleteTicketNumbers();
     newExportInstance.PrintCompleteTicketNumbers();
+    newExportInstance.GetTicketInfoFromNumber(7262);
+    newExportInstance.PrintTicketInfoFromNumber(7262);
+    newExportInstance.PrintTicketInfoFromNumber(7263);
 
     return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
