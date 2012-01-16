@@ -43,7 +43,7 @@
  *--------------------------------------------------------------------------------------
  */
 Session::Session ()
-    : mDesc(PACKAGE_STRING "\nOptions:\n[Without options, it prints pending envelopes to the current directory using default values of input and database files]")
+    : mDesc("Usage: ffmt [Options] [args]...\nA tool to assist Fedora Freemedia contributors.\nWithout options, it prints pending envelopes to the current directory using default values of input and database files.\n\nOptions")
 {
     std::string home_dir ((const char *)getenv("HOME"));
     mOutputDirectory = "./";

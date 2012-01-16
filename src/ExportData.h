@@ -83,6 +83,7 @@ class ExportData
     template <typename I> void PrintVectorContents(std::vector<I> input_vector);
     std::string StatusToString(int status);
     std::string RequestToString(int request);
+    std::vector<std::string> BreakAddressToMultiline(std::string addressToFormat);
     /* ====================  DATA MEMBERS  ======================================= */
     sqlite3 *mpDatabaseHandle;
     sqlite3_stmt *mpStatementHandle;

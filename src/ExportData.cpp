@@ -369,7 +369,9 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
     void
 ExportData::PrintTicketInfoFromNumber (int ticketNumber )
 {
-    if(mNameMap.find(ticketNumber) == mNameMap.end())
+    std::vector<std::string> returned_vector;
+    int i = 0;
+    if(mNameMap.find(ticketNumber) == mNameMap.end()) /* Not found */
     {
         std::cout << std::setw(25) << "***" << std::endl;
         std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl << std::setw(24) << ":" << " not in map, please retrieve it first." << std::endl;
@@ -379,7 +381,15 @@ ExportData::PrintTicketInfoFromNumber (int ticketNumber )
         std::cout << std::setw(25) << "***" << std::endl;
         std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl;
         std::cout << std::setw(25) << "Requester Name: " << mNameMap[ticketNumber] << std::endl;
-        std::cout << std::setw(25) << "Requester Address: " << mAddressMap[ticketNumber] << std::endl;
+
+        returned_vector = BreakAddressToMultiline(mAddressMap[ticketNumber]);
+        std::cout << std::setw(25) << "Requester Address: " << returned_vector[0] << std::endl;
+        for(i = 1; i < returned_vector.size(); i++)
+        {
+            std::cout << std::setw(25) << ": " << returned_vector[i] << std::endl; 
+
+        }
+
         std::cout << std::setw(25) << "Request: " << mRequirementMap[ticketNumber] << std::endl;
         std::cout << std::setw(25) << "Status: " << mStatusMap[ticketNumber] << std::endl;
         std::cout << std::setw(25) << "Service Date: " << mServiceDateMap[ticketNumber] << std::endl;
@@ -401,11 +411,11 @@ ExportData::StatusToString (int status )
 {
     if(status == 1)
     {
-        return std::string("New");
+        return std::string("PENDING");
     }
     else if(status == 2)
     {
-        return std::string("Fixed");
+        return std::string("FIXED");
     }
     return std::string("Unknown status");
 }		/* -----  end of method ExportData::StatusToString  ----- */
@@ -435,4 +445,27 @@ ExportData::RequestToString (int request )
 
     return std::string("Unknown") ;
 }		/* -----  end of method ExportData::RequestToString  ----- */
+
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: BreakAddressToMultiline
+ * Description:  Format the address according to line breaks
+ *--------------------------------------------------------------------------------------
+ */
+    std::vector<std::string>
+ExportData::BreakAddressToMultiline (std::string addressToFormat )
+{
+    std::vector<std::string> vector_to_return;
+    size_t search_origin = 0;
+    size_t found_pos = std::string::npos;
+    while((found_pos = addressToFormat.find('%',search_origin)) != std::string::npos)
+    {
+        vector_to_return.push_back(addressToFormat.substr(search_origin ,found_pos - search_origin));
+        search_origin = found_pos + 1;
+    }
+    return vector_to_return;
+}		/* -----  end of method ExportData::BreakAddressToMultiline  ----- */
 

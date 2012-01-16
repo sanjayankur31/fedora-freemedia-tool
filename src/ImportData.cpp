@@ -200,7 +200,7 @@ ImportData::ImportDataToDatabase ()
                 }
             }
             /*  using % as a place holder for a \c\r */
-            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(string_tokens[6],"[[BR]]","% ")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
+            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(string_tokens[6],"[[BR]]","%")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
 //            std::cout << "SQL statement is: " << insert_statement << std::endl;
 
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
