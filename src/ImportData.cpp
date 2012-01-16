@@ -200,7 +200,7 @@ ImportData::ImportDataToDatabase ()
                 }
             }
             /*  using % as a place holder for a \c\r */
-            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + ReplaceAll(string_tokens[6],"[[BR]]"," % ") + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
+            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(string_tokens[6],"[[BR]]","% ")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
 //            std::cout << "SQL statement is: " << insert_statement << std::endl;
 
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
@@ -254,15 +254,9 @@ ImportData::SanitizeSummary (std::string summaryToStrip)
 std::string
 ImportData::SanitizeAddress (std::string addressToSanitize)
 {
-    /*  Come up with logic to break address into 5 lines to fit the
-     *  envelope */
-/*     for(std::string::iterator string_iterator = addressToSanitize.begin(); string_iterator != addressToSanitize.end(); string_iterator++)
- *     {
- *         std::string strippedAddress = addressToSanitize.erase(addressToSanitize.find("[[BR]]"),6);
- *     }
- */
+    addressToSanitize.erase(0,1); /* remove starting " */
+    addressToSanitize.erase(addressToSanitize.end() -1 , addressToSanitize.end());
     return ToSentenceCase(addressToSanitize);
-//    return strippedAddress;
 }		/* -----  end of method ImportData::SanitizeAddress  ----- */
 
 /*

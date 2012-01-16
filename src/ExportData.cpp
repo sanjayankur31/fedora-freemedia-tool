@@ -49,7 +49,6 @@ ExportData::ExportData (std::string databaseFile, std::string outputDirectory)
     mOutputDirectory = outputDirectory;
 }  /* -----  end of method ExportData::ExportData  (constructor)  ----- */
 
-
     void
 ExportData::GetAllTicketNumbers ( )
 {
@@ -303,7 +302,7 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
 {
     int sqlite_return_value = 0;
     char* error_message;
-    const char *dummy;
+    const char *dummy, *dummy_string1;
     const unsigned char *dummy_string;
     char ticketNumberString[30];
     sprintf(ticketNumberString,"%d",ticketNumber);
@@ -334,8 +333,10 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
                     mNameMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
                     dummy_string = sqlite3_column_text(mpStatementHandle,2);
                     mAddressMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
-                    mRequirementMap.insert(std::pair <int, int> (ticketNumber, sqlite3_column_int(mpStatementHandle,3)));
-                    mStatusMap.insert(std::pair <int, int> (ticketNumber, sqlite3_column_int(mpStatementHandle,4)));
+                    dummy_string1 = RequestToString(sqlite3_column_int(mpStatementHandle,3)).c_str();
+                    mRequirementMap.insert(std::pair <int, std::string> (ticketNumber,std::string(dummy_string1)));
+                    dummy_string1 = StatusToString(sqlite3_column_int(mpStatementHandle,4)).c_str();
+                    mStatusMap.insert(std::pair <int, std::string> (ticketNumber,std::string(dummy_string1)));
                     dummy_string = sqlite3_column_text(mpStatementHandle,5);
                     mServiceDateMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
                 }
@@ -370,19 +371,68 @@ ExportData::PrintTicketInfoFromNumber (int ticketNumber )
 {
     if(mNameMap.find(ticketNumber) == mNameMap.end())
     {
-        std::cout << "Ticket #" << ticketNumber << " not in map, please retrieve it first." << std::endl;
+        std::cout << std::setw(25) << "***" << std::endl;
+        std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl << std::setw(24) << ":" << " not in map, please retrieve it first." << std::endl;
     }
     else
     {
-        std::cout << "Printing ticket information: " << std::endl;
-        std::cout << "Ticket Number: #" << ticketNumber << std::endl;
-        std::cout << "Requester Name: " << mNameMap[ticketNumber] << std::endl;
-        std::cout << "Requester Address: " << mAddressMap[ticketNumber] << std::endl;
-        std::cout << "Request: " << mRequirementMap[ticketNumber] << std::endl;
-        std::cout << "Status: " << mStatusMap[ticketNumber] << std::endl;
-        std::cout << "Service Date: " << mServiceDateMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "***" << std::endl;
+        std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl;
+        std::cout << std::setw(25) << "Requester Name: " << mNameMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Requester Address: " << mAddressMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Request: " << mRequirementMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Status: " << mStatusMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Service Date: " << mServiceDateMap[ticketNumber] << std::endl;
     }
 
     return ;
 }		/* -----  end of method ExportData::PrintTicketInfoFromNumber  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: StatusToString
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    std::string
+ExportData::StatusToString (int status )
+{
+    if(status == 1)
+    {
+        return std::string("New");
+    }
+    else if(status == 2)
+    {
+        return std::string("Fixed");
+    }
+    return std::string("Unknown status");
+}		/* -----  end of method ExportData::StatusToString  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: RequestToString
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    std::string
+ExportData::RequestToString (int request )
+{
+    switch(request)
+    {
+        case 1000:
+            return std::string("i386 DVD");
+        case 1001:
+            return std::string("x86_64 DVD");
+        case 1011:
+            return std::string("x86_64 Live");
+        case 1010:
+            return std::string("i386 Live");
+    }
+
+    return std::string("Unknown") ;
+}		/* -----  end of method ExportData::RequestToString  ----- */
 

@@ -42,6 +42,7 @@
 #include	<iostream>
 #include	<sqlite3.h>
 #include	<map>
+#include	<iomanip>
 #include	<cstdio>
 
 
@@ -80,6 +81,8 @@ class ExportData
 
     private:
     template <typename I> void PrintVectorContents(std::vector<I> input_vector);
+    std::string StatusToString(int status);
+    std::string RequestToString(int request);
     /* ====================  DATA MEMBERS  ======================================= */
     sqlite3 *mpDatabaseHandle;
     sqlite3_stmt *mpStatementHandle;
@@ -90,8 +93,8 @@ class ExportData
     std::vector <int> mCompleteTicketNumbers;
     std::map <int, std::string > mNameMap;
     std::map <int, std::string > mAddressMap;
-    std::map <int, int > mRequirementMap;
-    std::map <int, int > mStatusMap;
+    std::map <int, std::string > mRequirementMap;
+    std::map <int, std::string > mStatusMap;
     std::map <int, std::string > mServiceDateMap;
     int mNumberOfPendingTickets;
     int mNumberOfCompleteTickets;
