@@ -60,12 +60,6 @@ class ImportData
 
     /* ====================  MUTATORS      ======================================= */
     void ImportDataToDatabase();
-    void ImportDataToDatabase(std::string dataFilenameWithPath);
-    std::string SanitizeSummary(std::string summaryToStrip);
-    std::string ReplaceAll(std::string str,const std::string from, const std::string to);
-    std::string MediaCode(std::string stringMediaName);
-    std::string SanitizeAddress(std::string addressToSanitize);
-    std::string ToSentenceCase(std::string textToModify);
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -73,6 +67,11 @@ class ImportData
     /* ====================  DATA MEMBERS  ======================================= */
 
     private:
+    std::string SanitizeSummary(std::string summaryToStrip);
+    std::string ReplaceAll(std::string str,const std::string from, const std::string to);
+    std::string MediaCode(std::string stringMediaName);
+    std::string SanitizeAddress(std::string addressToSanitize);
+    std::string ToSentenceCase(std::string textToModify);
     /* ====================  DATA MEMBERS  ======================================= */
     std::string mDataFile;
     std::string mConfigFile;

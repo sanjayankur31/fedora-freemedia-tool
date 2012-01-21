@@ -61,8 +61,11 @@ class ExportData
 
     /* ====================  ACCESSORS     ======================================= */
     void PrintAllTicketNumbers();
+    void PrintAllTickets();
     void PrintPendingTicketNumbers();
+    void PrintPendingTickets();
     void PrintCompleteTicketNumbers();
+    void PrintCompleteTickets();
 
     /* ====================  MUTATORS      ======================================= */
     void GetAllTicketNumbers();
@@ -72,12 +75,13 @@ class ExportData
     int NumberOfTotalTickets();
     int NumberOfCompleteTickets();
     void PrintTicketSummaryReport();
-    void GetTicketInfoFromNumber(int ticketNumber); /* This method will get the other data for a passed ticket number from the database on demand */
+    int GetTicketInfoFromNumber(int ticketNumber); /* This method will get the other data for a passed ticket number from the database on demand */
     void PrintTicketInfoFromNumber(int ticketNumber);
     void ImportTemplate();
-    void OverlayTemplate(int ticketNumber);
+    int OverlayTemplate(int ticketNumber);
     void SetSendersAddress(std::string sendersAddress);
     void SetSendersName(std::string sendersName);
+    std::string OutputDirectory();
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -88,7 +92,7 @@ class ExportData
     template <typename I> void PrintVectorContents(std::vector<I> input_vector);
     std::string StatusToString(int status);
     std::string RequestToString(int request);
-    std::vector<std::string> BreakAddressToMultiline(std::string addressToFormat);
+    std::vector<std::string> BreakAddressToMultiline(std::string addressToFormat, char delimiter);
     /* ====================  DATA MEMBERS  ======================================= */
     sqlite3 *mpDatabaseHandle;
     sqlite3_stmt *mpStatementHandle;

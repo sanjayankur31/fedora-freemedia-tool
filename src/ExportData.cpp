@@ -52,7 +52,7 @@ ExportData::ExportData (std::string databaseFile, std::string outputDirectory, s
     mSendersAddressStarty = 206;
     mReceiversAddressStartX = 350;
     mReceiversAddressStarty = 395;
-        
+
 }  /* -----  end of method ExportData::ExportData  (constructor)  ----- */
 
     void
@@ -303,7 +303,7 @@ ExportData::PrintCompleteTicketNumbers ( )
  * fills up my maps
  *--------------------------------------------------------------------------------------
  */
-    void
+    int
 ExportData::GetTicketInfoFromNumber (int ticketNumber )
 {
     int sqlite_return_value = 0;
@@ -313,7 +313,8 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
     char ticketNumberString[30];
     sprintf(ticketNumberString,"%d",ticketNumber);
 
-    mCompleteTicketNumbers.clear();
+    if(mNameMap.find(ticketNumber) != mNameMap.end()) /* if the value isn't already in there! */
+        return 0;
 
     sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
     if(sqlite_return_value == SQLITE_OK)
@@ -322,31 +323,25 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
         sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
         if(sqlite_return_value == SQLITE_OK)
         {
-            do
+            sqlite_return_value = sqlite3_step(mpStatementHandle);
+            if(sqlite_return_value == SQLITE_ERROR)
             {
-                sqlite_return_value = sqlite3_step(mpStatementHandle);
-                if(sqlite_return_value == SQLITE_ERROR)
-                {
-                    std::cout << "Error stepping returned rows" << std::endl;
-                    std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
-                    sqlite3_close(mpDatabaseHandle);
-                    return;
+                std::cout << "Could not find info on ticket number " << ticketNumber << " in the database!"  << std::endl;
+                std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                sqlite3_close(mpDatabaseHandle);
+                return -1;
 
-                }
-                if(mNameMap.find(ticketNumber) == mNameMap.end()) /* if the value isn't already in there! */
-                {
-                    dummy_string = sqlite3_column_text(mpStatementHandle,1);
-                    mNameMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
-                    dummy_string = sqlite3_column_text(mpStatementHandle,2);
-                    mAddressMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
-                    dummy_string1 = RequestToString(sqlite3_column_int(mpStatementHandle,3)).c_str();
-                    mRequirementMap.insert(std::pair <int, std::string> (ticketNumber,std::string(dummy_string1)));
-                    dummy_string1 = StatusToString(sqlite3_column_int(mpStatementHandle,4)).c_str();
-                    mStatusMap.insert(std::pair <int, std::string> (ticketNumber,std::string(dummy_string1)));
-                    dummy_string = sqlite3_column_text(mpStatementHandle,5);
-                    mServiceDateMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
-                }
-            }while(sqlite_return_value != SQLITE_DONE);
+            }
+            dummy_string = sqlite3_column_text(mpStatementHandle,1);
+            mNameMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
+            dummy_string = sqlite3_column_text(mpStatementHandle,2);
+            mAddressMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
+            dummy_string1 = RequestToString(sqlite3_column_int(mpStatementHandle,3)).c_str();
+            mRequirementMap.insert(std::pair <int, std::string> (ticketNumber,std::string(dummy_string1)));
+            dummy_string1 = StatusToString(sqlite3_column_int(mpStatementHandle,4)).c_str();
+            mStatusMap.insert(std::pair <int, std::string> (ticketNumber,std::string(dummy_string1)));
+            dummy_string = sqlite3_column_text(mpStatementHandle,5);
+            mServiceDateMap.insert(std::pair <int, std::string> (ticketNumber, std::string(reinterpret_cast<const char*>(dummy_string))));
 
         }
         else
@@ -354,14 +349,12 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
             std::cout << "Error preparing select query" << std::endl;
             std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
             sqlite3_close(mpDatabaseHandle);
+            return -1;
         }
 
     }
-    /*  why is this extra 0 being added? sqlite quirkyness? */
-    mCompleteTicketNumbers.pop_back();
-    mNumberOfCompleteTickets = mCompleteTicketNumbers.size();
     sqlite3_close(mpDatabaseHandle);
-    return ;
+    return 0;
 }		/* -----  end of method ExportData::GetTicketInfoFromNumber  ----- */
 
 
@@ -388,7 +381,12 @@ ExportData::PrintTicketInfoFromNumber (int ticketNumber )
         std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl;
         std::cout << std::setw(25) << "Requester Name: " << mNameMap[ticketNumber] << std::endl;
 
-        returned_vector = BreakAddressToMultiline(mAddressMap[ticketNumber]);
+        returned_vector = BreakAddressToMultiline(mAddressMap[ticketNumber],'%');
+        if(returned_vector.empty())
+        {
+            std::cout << "An error occured while printing information on ticket: " << ticketNumber << std::endl;
+            return;
+        }
         std::cout << std::setw(25) << "Requester Address: " << returned_vector[0] << std::endl;
         for(i = 1; i < returned_vector.size(); i++)
         {
@@ -461,14 +459,52 @@ ExportData::RequestToString (int request )
  *--------------------------------------------------------------------------------------
  */
     std::vector<std::string>
-ExportData::BreakAddressToMultiline (std::string addressToFormat )
+ExportData::BreakAddressToMultiline (std::string addressToFormat, char delimiter )
 {
     std::vector<std::string> vector_to_return;
+    std::string temp_buffer;
     size_t search_origin = 0;
     size_t found_pos = std::string::npos;
-    while((found_pos = addressToFormat.find('%',search_origin)) != std::string::npos)
+    while((found_pos = addressToFormat.find(delimiter,search_origin)) != std::string::npos)
     {
-        vector_to_return.push_back(addressToFormat.substr(search_origin ,found_pos - search_origin));
+        temp_buffer = addressToFormat.substr(search_origin ,found_pos - search_origin);
+        if(temp_buffer.size() < 36)
+            vector_to_return.push_back(temp_buffer);
+        else
+        {
+            std::vector<std::string> line_broken_down = BreakAddressToMultiline(temp_buffer, ',');
+            if(line_broken_down.empty())
+            {
+                std::cout << "Splitter function failed to format the address.\nPlease modify the address manually and retry!" << std::endl;
+                vector_to_return.clear();
+                return vector_to_return;
+            }
+
+            int total_size = line_broken_down[0].size();
+            std::string string_to_push = line_broken_down[0];
+            for (int i = 1; i < line_broken_down.size() ; i++)
+            {
+                if((total_size + line_broken_down[i].size()) < 36)
+                {
+                    string_to_push += ("," + line_broken_down[i]);
+                    total_size += (1 + line_broken_down[i].size());
+                }
+                else
+                {
+                    if(string_to_push != "")
+                    {
+                        vector_to_return.push_back(string_to_push);
+                        string_to_push = line_broken_down[i];
+                        total_size = line_broken_down[i].size();
+                    }
+                }
+            }
+            if(string_to_push != "")
+            {
+                vector_to_return.push_back(string_to_push);
+            }
+        }
+
         search_origin = found_pos + 1;
     }
     return vector_to_return;
@@ -486,9 +522,7 @@ ExportData::BreakAddressToMultiline (std::string addressToFormat )
 ExportData::ImportTemplate ()
 {
     mImageTemplate.read(mImageTemplateLocation);
-    mDestinationImageTemplate = mImageTemplate;
-//    mDestinationImageTemplate.font("@Comfortaa-Regular");
-    mDestinationImageTemplate.fontPointsize(12);
+    //    mDestinationImageTemplate.font("@Comfortaa-Regular");
     return ;
 }		/* -----  end of method ExportData::ImportTemplate  ----- */
 
@@ -500,12 +534,24 @@ ExportData::ImportTemplate ()
  * Description:  
  *--------------------------------------------------------------------------------------
  */
-    void
+    int
 ExportData::OverlayTemplate (int ticketNumber)
 {
     int i;
     std::vector<std::string>  formatted_address ;
-    formatted_address = BreakAddressToMultiline(mSendersAddress);
+    formatted_address = BreakAddressToMultiline(mSendersAddress,'%');
+    if(formatted_address.empty())
+    {
+        std::cout << "Error printing senders address: " << mSendersAddress << ". Please recheck the value provided" << std::endl;
+        return -1;
+    }
+    char ticket_number_string[50];
+    sprintf(ticket_number_string,"%d",ticketNumber);
+    std::string output_file_name = OutputDirectory() + "freemediaEnvelope" + std::string(ticket_number_string) + ".png";
+
+    mDestinationImageTemplate = mImageTemplate;
+    mDestinationImageTemplate.fontPointsize(12);
+
     mDestinationImageTemplate.draw(Magick::DrawableText(mSendersAddressStartX,mSendersAddressStarty + 14,mSendersName.c_str()));
     for (i = 0; i < formatted_address.size(); i++)
     {
@@ -515,15 +561,20 @@ ExportData::OverlayTemplate (int ticketNumber)
     formatted_address.clear();
 
     GetTicketInfoFromNumber(ticketNumber);      /* fill up the maps */
-    formatted_address = BreakAddressToMultiline(mAddressMap[ticketNumber]);
+    formatted_address = BreakAddressToMultiline(mAddressMap[ticketNumber],'%');
+
+    if(formatted_address.empty())
+    {
+        return -1;
+    }
     for (i = 0; i < formatted_address.size(); i++)
     {
         mDestinationImageTemplate.draw(Magick::DrawableText(mReceiversAddressStartX,mReceiversAddressStarty + (i + 1) * 14,formatted_address[i].c_str()));
     }
-
     mDestinationImageTemplate.display();
-    mDestinationImageTemplate.write("./freemedia.png");
-    return ;
+    mDestinationImageTemplate.write(output_file_name.c_str());
+    std::cout << "Printed envelope for ticket number " << ticketNumber << " to " << output_file_name  << "." << std::endl;
+    return 0;
 }		/* -----  end of method ExportData::OverlayTemplate  ----- */
 
 
@@ -555,4 +606,80 @@ ExportData::SetSendersAddress (std::string sendersAddress )
     mSendersAddress = sendersAddress;
     return ;
 }		/* -----  end of method ExportData::SetSendersAddress  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: OutputDirectory
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+std::string
+ExportData::OutputDirectory ( )
+{
+    return mOutputDirectory;
+}		/* -----  end of method ExportData::OutputDirectory  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintAllTickets
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintAllTickets ( )
+{
+    GetAllTicketNumbers();
+
+    for(int i = 0; i < mAllTicketNumbers.size(); i++)
+    {
+        GetTicketInfoFromNumber(mAllTicketNumbers[i]);
+        PrintTicketInfoFromNumber(mAllTicketNumbers[i]);
+    }
+    return ;
+}		/* -----  end of method ExportData::PrintAllTickets  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintPendingTickets
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintPendingTickets ( )
+{
+    std::cout << "Total Pending tickets are: " << mPendingTicketNumbers.size() << std::endl;
+    for(int i = 0; i < mPendingTicketNumbers.size(); i++)
+    {
+        GetTicketInfoFromNumber(mPendingTicketNumbers[i]);
+        PrintTicketInfoFromNumber(mPendingTicketNumbers[i]);
+    }
+    return ;
+}		/* -----  end of method ExportData::PrintPendingTickets  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintCompleteTickets
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintCompleteTickets ( )
+{
+    GetCompleteTicketNumbers();
+
+    for(int i = 0; i < mCompleteTicketNumbers.size(); i++)
+    {
+        GetTicketInfoFromNumber(mCompleteTicketNumbers[i]);
+        PrintTicketInfoFromNumber(mCompleteTicketNumbers[i]);
+    }
+    return ;
+}		/* -----  end of method ExportData::PrintCompleteTickets  ----- */
 

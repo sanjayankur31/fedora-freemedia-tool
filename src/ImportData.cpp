@@ -112,25 +112,6 @@ ImportData::ImportData (std::string dataFile, std::string databaseFile)
 }  /* -----  end of method ImportData::ImportData  (constructor)  ----- */
 
 
-/*
- *--------------------------------------------------------------------------------------
- *       Class:  ImportData
- *      Method:  ImportData :: ImportDataToDatabase
- * Description:  Import data from the data file to the database
- *--------------------------------------------------------------------------------------
- */
-void
-ImportData::ImportDataToDatabase (std::string dataFilenameWithPath)
-{
-    if(!dataFilenameWithPath.empty())
-    {
-        mDataFile = dataFilenameWithPath;
-    }
-    std::cout << "Using datafile: " << mDataFile << std::endl;
-    ImportDataToDatabase();
-    return ;
-}		/* -----  end of method ImportData::ImportDataToDatabase  ----- */
-
 void
 ImportData::ImportDataToDatabase ()
 {
@@ -140,6 +121,7 @@ ImportData::ImportDataToDatabase ()
     int sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
     bool in_address = false;
     char* error_message;
+    int record_count = 0;
 
     if(sqlite_return_value != SQLITE_OK)
     {
@@ -158,6 +140,7 @@ ImportData::ImportDataToDatabase ()
         while(mDataFileHandle.good() && !mDataFileHandle.eof())
         {
             in_address = false;
+            record_count++;
 //            std::cout << "Got a new line now.." << std::endl;
             string_tokens.clear();
             temp_buffer.clear();
@@ -200,7 +183,7 @@ ImportData::ImportDataToDatabase ()
                 }
             }
             /*  using % as a place holder for a \c\r */
-            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(string_tokens[6],"[[BR]]","%")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
+            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(string_tokens[6],"[[BR]]",",%"),", ",",")," ,",","),",,",",")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
 //            std::cout << "SQL statement is: " << insert_statement << std::endl;
 
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
@@ -223,6 +206,7 @@ ImportData::ImportDataToDatabase ()
     }
     mDataFileHandle.close();
     sqlite3_close(mpDatabaseHandle);
+    std::cout << record_count << " records successfully imported into database." << std::endl;
     return ;
 }		/* -----  end of method ImportData::ImportDataToDatabase  ----- */
 

@@ -33,7 +33,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = test$(EXEEXT)
+bin_PROGRAMS = ffmtool$(EXEEXT)
 subdir = src
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -47,12 +47,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_test_OBJECTS = test-ImportData.$(OBJEXT) test-test.$(OBJEXT) \
-	test-Session.$(OBJEXT) test-ExportData.$(OBJEXT)
-test_OBJECTS = $(am_test_OBJECTS)
-test_LDADD = $(LDADD)
-test_LINK = $(CXXLD) $(test_CXXFLAGS) $(CXXFLAGS) $(test_LDFLAGS) \
-	$(LDFLAGS) -o $@
+am_ffmtool_OBJECTS = ffmtool-ImportData.$(OBJEXT) \
+	ffmtool-main.$(OBJEXT) ffmtool-Session.$(OBJEXT) \
+	ffmtool-ExportData.$(OBJEXT)
+ffmtool_OBJECTS = $(am_ffmtool_OBJECTS)
+ffmtool_LDADD = $(LDADD)
+ffmtool_LINK = $(CXXLD) $(ffmtool_CXXFLAGS) $(CXXFLAGS) \
+	$(ffmtool_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -66,8 +67,8 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(test_SOURCES)
-DIST_SOURCES = $(test_SOURCES)
+SOURCES = $(ffmtool_SOURCES)
+DIST_SOURCES = $(ffmtool_SOURCES)
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -163,12 +164,12 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-test_SOURCES = ImportData.cpp ImportData.h test.cpp \
+ffmtool_SOURCES = ImportData.cpp ImportData.h main.cpp \
 			   Session.cpp Session.h ExportData.cpp ExportData.h
 
 noinst_HEADERS = ImportData.h Session.h ExportData.h
-test_CXXFLAGS = @PACKAGE_CFLAGS@ @BOOST_CFLAGS@
-test_LDFLAGS = @PACKAGE_LIBS@ @BOOST_LIBS@
+ffmtool_CXXFLAGS = @PACKAGE_CFLAGS@ @BOOST_CFLAGS@
+ffmtool_LDFLAGS = @PACKAGE_LIBS@ @BOOST_LIBS@
 all: all-am
 
 .SUFFIXES:
@@ -240,9 +241,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-test$(EXEEXT): $(test_OBJECTS) $(test_DEPENDENCIES) 
-	@rm -f test$(EXEEXT)
-	$(test_LINK) $(test_OBJECTS) $(test_LDADD) $(LIBS)
+ffmtool$(EXEEXT): $(ffmtool_OBJECTS) $(ffmtool_DEPENDENCIES) 
+	@rm -f ffmtool$(EXEEXT)
+	$(ffmtool_LINK) $(ffmtool_OBJECTS) $(ffmtool_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -250,10 +251,10 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-ExportData.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-ImportData.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-Session.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffmtool-ExportData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffmtool-ImportData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffmtool-Session.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ffmtool-main.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -269,61 +270,61 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
-test-ImportData.o: ImportData.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-ImportData.o -MD -MP -MF $(DEPDIR)/test-ImportData.Tpo -c -o test-ImportData.o `test -f 'ImportData.cpp' || echo '$(srcdir)/'`ImportData.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-ImportData.Tpo $(DEPDIR)/test-ImportData.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ImportData.cpp' object='test-ImportData.o' libtool=no @AMDEPBACKSLASH@
+ffmtool-ImportData.o: ImportData.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-ImportData.o -MD -MP -MF $(DEPDIR)/ffmtool-ImportData.Tpo -c -o ffmtool-ImportData.o `test -f 'ImportData.cpp' || echo '$(srcdir)/'`ImportData.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-ImportData.Tpo $(DEPDIR)/ffmtool-ImportData.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ImportData.cpp' object='ffmtool-ImportData.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-ImportData.o `test -f 'ImportData.cpp' || echo '$(srcdir)/'`ImportData.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-ImportData.o `test -f 'ImportData.cpp' || echo '$(srcdir)/'`ImportData.cpp
 
-test-ImportData.obj: ImportData.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-ImportData.obj -MD -MP -MF $(DEPDIR)/test-ImportData.Tpo -c -o test-ImportData.obj `if test -f 'ImportData.cpp'; then $(CYGPATH_W) 'ImportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ImportData.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-ImportData.Tpo $(DEPDIR)/test-ImportData.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ImportData.cpp' object='test-ImportData.obj' libtool=no @AMDEPBACKSLASH@
+ffmtool-ImportData.obj: ImportData.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-ImportData.obj -MD -MP -MF $(DEPDIR)/ffmtool-ImportData.Tpo -c -o ffmtool-ImportData.obj `if test -f 'ImportData.cpp'; then $(CYGPATH_W) 'ImportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ImportData.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-ImportData.Tpo $(DEPDIR)/ffmtool-ImportData.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ImportData.cpp' object='ffmtool-ImportData.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-ImportData.obj `if test -f 'ImportData.cpp'; then $(CYGPATH_W) 'ImportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ImportData.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-ImportData.obj `if test -f 'ImportData.cpp'; then $(CYGPATH_W) 'ImportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ImportData.cpp'; fi`
 
-test-test.o: test.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-test.o -MD -MP -MF $(DEPDIR)/test-test.Tpo -c -o test-test.o `test -f 'test.cpp' || echo '$(srcdir)/'`test.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-test.Tpo $(DEPDIR)/test-test.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='test-test.o' libtool=no @AMDEPBACKSLASH@
+ffmtool-main.o: main.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-main.o -MD -MP -MF $(DEPDIR)/ffmtool-main.Tpo -c -o ffmtool-main.o `test -f 'main.cpp' || echo '$(srcdir)/'`main.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-main.Tpo $(DEPDIR)/ffmtool-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.cpp' object='ffmtool-main.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-test.o `test -f 'test.cpp' || echo '$(srcdir)/'`test.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-main.o `test -f 'main.cpp' || echo '$(srcdir)/'`main.cpp
 
-test-test.obj: test.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-test.obj -MD -MP -MF $(DEPDIR)/test-test.Tpo -c -o test-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-test.Tpo $(DEPDIR)/test-test.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='test-test.obj' libtool=no @AMDEPBACKSLASH@
+ffmtool-main.obj: main.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-main.obj -MD -MP -MF $(DEPDIR)/ffmtool-main.Tpo -c -o ffmtool-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-main.Tpo $(DEPDIR)/ffmtool-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.cpp' object='ffmtool-main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
 
-test-Session.o: Session.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-Session.o -MD -MP -MF $(DEPDIR)/test-Session.Tpo -c -o test-Session.o `test -f 'Session.cpp' || echo '$(srcdir)/'`Session.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-Session.Tpo $(DEPDIR)/test-Session.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Session.cpp' object='test-Session.o' libtool=no @AMDEPBACKSLASH@
+ffmtool-Session.o: Session.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-Session.o -MD -MP -MF $(DEPDIR)/ffmtool-Session.Tpo -c -o ffmtool-Session.o `test -f 'Session.cpp' || echo '$(srcdir)/'`Session.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-Session.Tpo $(DEPDIR)/ffmtool-Session.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Session.cpp' object='ffmtool-Session.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-Session.o `test -f 'Session.cpp' || echo '$(srcdir)/'`Session.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-Session.o `test -f 'Session.cpp' || echo '$(srcdir)/'`Session.cpp
 
-test-Session.obj: Session.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-Session.obj -MD -MP -MF $(DEPDIR)/test-Session.Tpo -c -o test-Session.obj `if test -f 'Session.cpp'; then $(CYGPATH_W) 'Session.cpp'; else $(CYGPATH_W) '$(srcdir)/Session.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-Session.Tpo $(DEPDIR)/test-Session.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Session.cpp' object='test-Session.obj' libtool=no @AMDEPBACKSLASH@
+ffmtool-Session.obj: Session.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-Session.obj -MD -MP -MF $(DEPDIR)/ffmtool-Session.Tpo -c -o ffmtool-Session.obj `if test -f 'Session.cpp'; then $(CYGPATH_W) 'Session.cpp'; else $(CYGPATH_W) '$(srcdir)/Session.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-Session.Tpo $(DEPDIR)/ffmtool-Session.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Session.cpp' object='ffmtool-Session.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-Session.obj `if test -f 'Session.cpp'; then $(CYGPATH_W) 'Session.cpp'; else $(CYGPATH_W) '$(srcdir)/Session.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-Session.obj `if test -f 'Session.cpp'; then $(CYGPATH_W) 'Session.cpp'; else $(CYGPATH_W) '$(srcdir)/Session.cpp'; fi`
 
-test-ExportData.o: ExportData.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-ExportData.o -MD -MP -MF $(DEPDIR)/test-ExportData.Tpo -c -o test-ExportData.o `test -f 'ExportData.cpp' || echo '$(srcdir)/'`ExportData.cpp
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-ExportData.Tpo $(DEPDIR)/test-ExportData.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExportData.cpp' object='test-ExportData.o' libtool=no @AMDEPBACKSLASH@
+ffmtool-ExportData.o: ExportData.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-ExportData.o -MD -MP -MF $(DEPDIR)/ffmtool-ExportData.Tpo -c -o ffmtool-ExportData.o `test -f 'ExportData.cpp' || echo '$(srcdir)/'`ExportData.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-ExportData.Tpo $(DEPDIR)/ffmtool-ExportData.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExportData.cpp' object='ffmtool-ExportData.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-ExportData.o `test -f 'ExportData.cpp' || echo '$(srcdir)/'`ExportData.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-ExportData.o `test -f 'ExportData.cpp' || echo '$(srcdir)/'`ExportData.cpp
 
-test-ExportData.obj: ExportData.cpp
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -MT test-ExportData.obj -MD -MP -MF $(DEPDIR)/test-ExportData.Tpo -c -o test-ExportData.obj `if test -f 'ExportData.cpp'; then $(CYGPATH_W) 'ExportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ExportData.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test-ExportData.Tpo $(DEPDIR)/test-ExportData.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExportData.cpp' object='test-ExportData.obj' libtool=no @AMDEPBACKSLASH@
+ffmtool-ExportData.obj: ExportData.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -MT ffmtool-ExportData.obj -MD -MP -MF $(DEPDIR)/ffmtool-ExportData.Tpo -c -o ffmtool-ExportData.obj `if test -f 'ExportData.cpp'; then $(CYGPATH_W) 'ExportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ExportData.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/ffmtool-ExportData.Tpo $(DEPDIR)/ffmtool-ExportData.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ExportData.cpp' object='ffmtool-ExportData.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_CXXFLAGS) $(CXXFLAGS) -c -o test-ExportData.obj `if test -f 'ExportData.cpp'; then $(CYGPATH_W) 'ExportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ExportData.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ffmtool_CXXFLAGS) $(CXXFLAGS) -c -o ffmtool-ExportData.obj `if test -f 'ExportData.cpp'; then $(CYGPATH_W) 'ExportData.cpp'; else $(CYGPATH_W) '$(srcdir)/ExportData.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

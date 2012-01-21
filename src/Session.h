@@ -45,6 +45,8 @@
 #include	<errno.h>
 #include	<vector>
 #include	<cstdio>
+#include	"ImportData.h"
+#include	"ExportData.h"
 
 /*
  * =====================================================================================

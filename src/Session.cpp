@@ -48,6 +48,7 @@ Session::Session ()
     std::string home_dir ((const char *)getenv("HOME"));
     mOutputDirectory = "./";
     mConfigDirectory = home_dir + "/" + ".config/fedora-freemedia-tool/";
+    mConfigFileLocation = mConfigDirectory + "fedora-freemedia-tool.cfg";
     mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
     mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
@@ -60,19 +61,19 @@ Session::Session ()
     mListToPrint.push_back(0);
     mDesc.add_options()
         ("help,h", "Print this usage message.")
-        ("config-file,c",boost::program_options::value<std::string>(&mConfigFileLocation),"Configuration file")
-        ("database,d",boost::program_options::value<std::string>(&mDatabaseFileLocation),"Complete output file path\n(default: ~/.local/share/fedora-freemedia-tool/freemedia-database.db)")
-        ("input-file,i",boost::program_options::value<std::string>(&mInputReportFileLocation),"Complete input file path\n(default: ~/.local/share/fedora-freemedia-tool/report.csv)")
-        ("add-new,a",boost::program_options::value<std::string>()->zero_tokens(),"Manually add a new entry")
-        ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory),"Directory to put the printed envelopes\n(default: ./ (current directory))")
-        ("print,p",boost::program_options::value< std::vector<int> >(&mListToPrint)->multitoken(),"List of ticket numbers to print envelopes for\n(default: 0 meaning all new tickets)")
-        ("list,l",boost::program_options::value<std::string>(&mListWhat),"List records in database\nall,pending,complete (default: all)")
-        ("list-long,g",boost::program_options::value<std::string>(&mListLongWhat),"List records with description\nall,pending,complete (default:all)")
-        ("v-level,v",boost::program_options::value<int>(&mVerboseLevel),"Debug level: 1,2,3\n(default: 0)")
-        ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name")
-        ("sender-add,s",boost::program_options::value<std::string>(&mSendersAddress)->multitoken(),"Senders address")
-        ("template,t",boost::program_options::value<std::string>(&mEnvelopeTemplateLocation),"Location of envelope template\n(default: /usr/share/fedora-freemedia-tool/Freemedia-mailer.png)")
-        ("version",boost::program_options::value<std::string>()->zero_tokens(),"Package information: version etc.")
+        ("config-file,c",boost::program_options::value<std::string>(&mConfigFileLocation)->implicit_value(mConfigFileLocation),"Configuration file\n")
+        ("database,d",boost::program_options::value<std::string>(&mDatabaseFileLocation)->implicit_value(mDatabaseFileLocation.c_str()),"Complete output file path\n")
+        ("import,i",boost::program_options::value<std::string>(&mInputReportFileLocation)->implicit_value(mInputReportFileLocation.c_str()),"Import data\nOptional argument: Complete input file path\n")
+        ("add-new,a",boost::program_options::value<std::string>()->implicit_value(""),"Manually add a new entry: unimplemented\n")
+        ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory)->implicit_value(mOutputDirectory.c_str()),"Directory to put the printed envelopes\n")
+        ("print,p",boost::program_options::value< std::vector<int> >(&mListToPrint)->multitoken(),"List of ticket numbers to print envelopes for\n(default: 0 meaning all new tickets)\n")
+        ("list,l",boost::program_options::value<std::string>(&mListWhat)->implicit_value(mListWhat.c_str()),"List records in database\nall,pending,complete\n")
+        ("list-long,g",boost::program_options::value<std::string>(&mListLongWhat)->implicit_value(mListLongWhat.c_str()),"List records with description\nall,pending,complete\n")
+        ("v-level,v",boost::program_options::value<int>(&mVerboseLevel)->implicit_value(mVerboseLevel),"Debug level: 1,2,3\n")
+        ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name\n")
+        ("sender-add,s",boost::program_options::value<std::string>(&mSendersAddress)->multitoken(),"Senders address\nUse % as a line limiter\n")
+        ("template,t",boost::program_options::value<std::string>(&mEnvelopeTemplateLocation)->implicit_value(mEnvelopeTemplateLocation.c_str()),"Location of envelope template\n")
+        ("version,V",boost::program_options::value<std::string>()->implicit_value(""),"Package information: version etc.")
         ;
 
 }  /* -----  end of method Session::Session  (constructor)  ----- */
@@ -91,14 +92,87 @@ Session::ParseCommandLine (int argc, char **argv)
     /*  notify required to save the values into my variables. */
     /*  TODO: confirm this behaviour */
     boost::program_options::notify(mVariableMap);
+    int counter;
 
     if (mVariableMap.count("help")) 
     {
         std::cout << mDesc << std::endl;
-        return -1;
+    }
+    else if(mVariableMap.count("version"))
+    {
+        std::cout << PACKAGE_NAME  << " Version : " << VERSION << std::endl;
+        std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << std::endl;
+    }
+    else {
+        if(PrepareSession() == -1)
+            return 0;
+
+        if (mVariableMap.count("import"))
+        {
+            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+            newInstance.ImportDataToDatabase();
+        }
+        else if(mVariableMap.count("print"))
+        {
+            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+            newExportInstance.ImportTemplate();
+            newExportInstance.SetSendersName(SendersName());
+            newExportInstance.SetSendersAddress(SendersAddress());
+            for (counter = 0; counter < mListToPrint.size(); counter++)
+            {
+                if(newExportInstance.GetTicketInfoFromNumber(mListToPrint[counter]) == -1)
+                    std::cout << "Could not find data on ticket " << mListToPrint[counter] << " in database." << std::endl;
+                else
+                {
+                    if(newExportInstance.OverlayTemplate(mListToPrint[counter]) == -1)
+                    {
+                        std::cout << "Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
+                    }
+                }
+            }
+        }
+        else if(mVariableMap.count("list"))
+        {
+            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+            if(mListWhat == "pending")
+            {
+                newExportInstance.GetPendingTicketNumbers();
+                newExportInstance.PrintPendingTicketNumbers();
+            }
+            else if(mListWhat == "complete")
+            {
+                newExportInstance.GetCompleteTicketNumbers();
+                newExportInstance.PrintCompleteTicketNumbers();
+            }
+            else
+            {
+                newExportInstance.GetAllTicketNumbers();
+                newExportInstance.PrintAllTicketNumbers();
+            }
+
+        }
+        else if(mVariableMap.count("list-long"))
+        {
+            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+            if(mListLongWhat == "pending")
+            {
+                newExportInstance.GetPendingTicketNumbers();
+                newExportInstance.PrintPendingTickets();
+            }
+            else if(mListLongWhat == "complete")
+            {
+                newExportInstance.GetCompleteTicketNumbers();
+                newExportInstance.PrintCompleteTickets();
+            }
+            else
+            {
+                newExportInstance.GetAllTicketNumbers();
+                newExportInstance.PrintAllTickets();
+            }
+        }
     }
 
-    return 0;
+    return -1;
 }		/* -----  end of method Session::ParseCommandLine  ----- */
 
 /*
