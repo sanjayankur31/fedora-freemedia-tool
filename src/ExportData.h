@@ -44,6 +44,7 @@
 #include	<map>
 #include	<iomanip>
 #include	<cstdio>
+#include	<Magick++.h>
 
 
 /*
@@ -56,7 +57,7 @@ class ExportData
 {
     public:
     /* ====================  LIFECYCLE     ======================================= */
-    ExportData (std::string databaseFile, std::string outputDirectory);
+    ExportData (std::string databaseFile, std::string outputDirectory, std::string templateLocation);
 
     /* ====================  ACCESSORS     ======================================= */
     void PrintAllTicketNumbers();
@@ -73,6 +74,10 @@ class ExportData
     void PrintTicketSummaryReport();
     void GetTicketInfoFromNumber(int ticketNumber); /* This method will get the other data for a passed ticket number from the database on demand */
     void PrintTicketInfoFromNumber(int ticketNumber);
+    void ImportTemplate();
+    void OverlayTemplate(int ticketNumber);
+    void SetSendersAddress(std::string sendersAddress);
+    void SetSendersName(std::string sendersName);
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -89,6 +94,7 @@ class ExportData
     sqlite3_stmt *mpStatementHandle;
     std::string mDatabaseFile;
     std::string mOutputDirectory;
+    std::string mImageTemplateLocation;
     std::vector <int> mAllTicketNumbers;
     std::vector <int> mPendingTicketNumbers;
     std::vector <int> mCompleteTicketNumbers;
@@ -100,6 +106,14 @@ class ExportData
     int mNumberOfPendingTickets;
     int mNumberOfCompleteTickets;
     int mNumberOfTotalTickets;
+    Magick::Image mImageTemplate;
+    Magick::Image mDestinationImageTemplate;
+    int mSendersAddressStartX;
+    int mSendersAddressStarty;
+    int mReceiversAddressStartX;
+    int mReceiversAddressStarty;
+    std::string mSendersAddress;
+    std::string mSendersName;
 
 
 }; /* -----  end of class ExportData  ----- */

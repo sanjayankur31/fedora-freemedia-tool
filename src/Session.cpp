@@ -52,6 +52,8 @@ Session::Session ()
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
     mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
     mEnvelopeTemplateLocation = "/usr/share/fedora-freemedia-tool/Freemedia-mailer.png";
+    mSendersName = "Free media contributors name comes here!";
+    mSendersAddress = "Address with %precent sign as %line break comes here!%";
     mListWhat = "all";
     mListLongWhat = "all";
     mVerboseLevel = 0;
@@ -233,4 +235,46 @@ Session::PrintListAsString ( )
     }
     return ret_val;
 }		/* -----  end of method Session::PrintList  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Session
+ *      Method:  Session :: EnvelopeTemplateLocation
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+std::string
+Session::EnvelopeTemplateLocation ()
+{
+    return mEnvelopeTemplateLocation;
+}		/* -----  end of method Session::EnvelopeTemplateLocation  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Session
+ *      Method:  Session :: SendersName
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+std::string
+Session::SendersName ( )
+{
+    return mSendersName;
+}		/* -----  end of method Session::SendersName  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Session
+ *      Method:  Session :: SendersAddress
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+std::string
+Session::SendersAddress ( )
+{
+    return mSendersAddress;
+}		/* -----  end of method Session::SendersAddress  ----- */
 

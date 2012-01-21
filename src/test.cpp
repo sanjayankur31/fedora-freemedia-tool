@@ -60,11 +60,14 @@ main ( int argc, char *argv[] )
     std::cout << "Input report file location is: " <<  currentSession.InputReportFileLocation() << std::endl;
     std::cout << "Database file location is: " <<  currentSession.DatabaseFileLocation() << std::endl;
     std::cout << "Print list is: " << currentSession.PrintListAsString() << std::endl;
+    std::cout << "Template location is " << currentSession.EnvelopeTemplateLocation() << std::endl;
 
     ImportData newInstance(currentSession.InputReportFileLocation(),currentSession.DatabaseFileLocation());
     newInstance.ImportDataToDatabase("");
 
-    ExportData newExportInstance(currentSession.DatabaseFileLocation(),currentSession.OutputDirectory());
+    ExportData newExportInstance(currentSession.DatabaseFileLocation(),currentSession.OutputDirectory(), currentSession.EnvelopeTemplateLocation());
+    newExportInstance.SetSendersName(currentSession.SendersName());
+    newExportInstance.SetSendersAddress(currentSession.SendersAddress());
     newExportInstance.GetAllTicketNumbers();
     newExportInstance.PrintAllTicketNumbers();
     newExportInstance.GetPendingTicketNumbers();
@@ -74,6 +77,8 @@ main ( int argc, char *argv[] )
     newExportInstance.GetTicketInfoFromNumber(7262);
     newExportInstance.PrintTicketInfoFromNumber(7262);
     newExportInstance.PrintTicketInfoFromNumber(7263);
+    newExportInstance.ImportTemplate();
+    newExportInstance.OverlayTemplate(7262);
 
     return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

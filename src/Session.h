@@ -64,6 +64,9 @@ class Session
     std::string InputReportFileLocation();
     std::string OutputDirectory();
     std::string PrintListAsString();
+    std::string EnvelopeTemplateLocation();
+    std::string SendersName();
+    std::string SendersAddress();
     int VerboseLevel();
 
     /* ====================  MUTATORS      ======================================= */

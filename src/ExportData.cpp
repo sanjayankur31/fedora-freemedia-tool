@@ -43,10 +43,16 @@
  * Description:  constructor
  *--------------------------------------------------------------------------------------
  */
-ExportData::ExportData (std::string databaseFile, std::string outputDirectory)
+ExportData::ExportData (std::string databaseFile, std::string outputDirectory, std::string templateLocation)
 {
     mDatabaseFile = databaseFile;
     mOutputDirectory = outputDirectory;
+    mImageTemplateLocation = templateLocation;
+    mSendersAddressStartX = 191;
+    mSendersAddressStarty = 206;
+    mReceiversAddressStartX = 350;
+    mReceiversAddressStarty = 395;
+        
 }  /* -----  end of method ExportData::ExportData  (constructor)  ----- */
 
     void
@@ -447,7 +453,6 @@ ExportData::RequestToString (int request )
 }		/* -----  end of method ExportData::RequestToString  ----- */
 
 
-
 /*
  *--------------------------------------------------------------------------------------
  *       Class:  ExportData
@@ -468,4 +473,86 @@ ExportData::BreakAddressToMultiline (std::string addressToFormat )
     }
     return vector_to_return;
 }		/* -----  end of method ExportData::BreakAddressToMultiline  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: ImportTemplate
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::ImportTemplate ()
+{
+    mImageTemplate.read(mImageTemplateLocation);
+    mDestinationImageTemplate = mImageTemplate;
+//    mDestinationImageTemplate.font("@Comfortaa-Regular");
+    mDestinationImageTemplate.fontPointsize(12);
+    return ;
+}		/* -----  end of method ExportData::ImportTemplate  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: OverlayTemplate
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::OverlayTemplate (int ticketNumber)
+{
+    int i;
+    std::vector<std::string>  formatted_address ;
+    formatted_address = BreakAddressToMultiline(mSendersAddress);
+    mDestinationImageTemplate.draw(Magick::DrawableText(mSendersAddressStartX,mSendersAddressStarty + 14,mSendersName.c_str()));
+    for (i = 0; i < formatted_address.size(); i++)
+    {
+        mDestinationImageTemplate.draw(Magick::DrawableText(mSendersAddressStartX,mSendersAddressStarty + (i + 2) * 14,formatted_address[i].c_str()));
+    }
+
+    formatted_address.clear();
+
+    GetTicketInfoFromNumber(ticketNumber);      /* fill up the maps */
+    formatted_address = BreakAddressToMultiline(mAddressMap[ticketNumber]);
+    for (i = 0; i < formatted_address.size(); i++)
+    {
+        mDestinationImageTemplate.draw(Magick::DrawableText(mReceiversAddressStartX,mReceiversAddressStarty + (i + 1) * 14,formatted_address[i].c_str()));
+    }
+
+    mDestinationImageTemplate.display();
+    mDestinationImageTemplate.write("./freemedia.png");
+    return ;
+}		/* -----  end of method ExportData::OverlayTemplate  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: SetSendersName
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::SetSendersName (std::string sendersName )
+{
+    mSendersName = sendersName;
+    return ;
+}		/* -----  end of method ExportData::SetSendersName  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: SetSendersAddress
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::SetSendersAddress (std::string sendersAddress )
+{
+    mSendersAddress = sendersAddress;
+    return ;
+}		/* -----  end of method ExportData::SetSendersAddress  ----- */
 
