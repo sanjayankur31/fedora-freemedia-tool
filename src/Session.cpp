@@ -100,7 +100,7 @@ Session::ParseCommandLine (int argc, char **argv)
     }
     else if(mVariableMap.count("version"))
     {
-        std::cout << PACKAGE_NAME  << " Version : " << VERSION << std::endl;
+        std::cout << PACKAGE_NAME  << " Version: " << VERSION << std::endl;
         std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << std::endl;
     }
     else {
