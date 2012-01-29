@@ -45,8 +45,11 @@
 #include	<errno.h>
 #include	<vector>
 #include	<cstdio>
+#include	<curlpp/cURLpp.hpp>
+#include	<curlpp/Options.hpp>
 #include	"ImportData.h"
 #include	"ExportData.h"
+#include	"GetReport.h"
 
 /*
  * =====================================================================================
@@ -60,6 +63,7 @@ class Session
     public:
     /* ====================  LIFECYCLE     ======================================= */
     Session ();                             /* constructor */
+    ~Session ();
 
     /* ====================  ACCESSORS     ======================================= */
     std::string DatabaseFileLocation();
@@ -84,6 +88,7 @@ class Session
     /* ====================  DATA MEMBERS  ======================================= */
     std::string mConfigDirectory;
     std::string mUserDataDirectory;
+    std::string mFASUsername;
     std::string mDatabaseFileLocation;
     std::string mInputReportFileLocation;
     std::string mConfigFileLocation;
@@ -94,7 +99,10 @@ class Session
     std::string mListLongWhat;
     std::string mEnvelopeTemplateLocation;
     std::vector<int> mListToPrint;
+    std::vector<int> mResolveTicketNumbers;
+    std::vector<int> mResetTicketNumbers;
     int mVerboseLevel;
+    int mModifyTicket;
     boost::program_options::variables_map mVariableMap;
     boost::program_options::options_description mDesc;
 

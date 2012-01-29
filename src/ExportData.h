@@ -66,6 +66,7 @@ class ExportData
     void PrintPendingTickets();
     void PrintCompleteTicketNumbers();
     void PrintCompleteTickets();
+    std::vector<int> PendingTicketNumbers();
 
     /* ====================  MUTATORS      ======================================= */
     void GetAllTicketNumbers();

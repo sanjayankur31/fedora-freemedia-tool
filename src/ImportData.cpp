@@ -111,7 +111,6 @@ ImportData::ImportData (std::string dataFile, std::string databaseFile)
 
 }  /* -----  end of method ImportData::ImportData  (constructor)  ----- */
 
-
 void
 ImportData::ImportDataToDatabase ()
 {
@@ -328,4 +327,73 @@ ImportData::ReplaceAll(std::string str, const std::string from, const std::strin
     return str;
 }       /* ----- end of method ImportData::ReplaceAll  ----- */
 
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ImportData
+ *      Method:  ImportData :: ModifyEntry
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    int
+ImportData::ModifyEntry (int ticketNumber )
+{
+    int sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+    return 0;
+}		/* -----  end of method ImportData::ModifyEntry  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ImportData
+ *      Method:  ImportData :: ToggleTickets
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    int
+ImportData::ToggleTickets (std::vector <int> ticketsToToggle , std::string toStatusAsString)
+{
+    int sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+    char* error_message;
+    char number_string[50];
+
+    if(sqlite_return_value != SQLITE_OK)
+    {
+
+        std::cout << "Error opening database file.. Please file a bug." << std::endl;
+        std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+        return -1;
+    }
+
+    if(ticketsToToggle[0] == 0 && ticketsToToggle.size() == 1)
+    {
+        std::string modify_statement_template = "UPDATE FREEMEDIA SET STATUS=" + toStatusAsString + ";";
+        sqlite_return_value = sqlite3_exec(mpDatabaseHandle, modify_statement_template.c_str(), dummy_callback_function, 0, &error_message);
+        std::cout << "Marked all tickets!" <<  std::endl;
+        if(sqlite_return_value != SQLITE_OK)
+        {
+            std::cout << "Error resolving ticket number. Please file a bug.." << std::endl;
+            std::cout << "SQlite error description: " << error_message << std::endl;
+            sqlite3_free(error_message);
+        }
+    }
+    else
+    {
+        std::string modify_statement_template = "UPDATE FREEMEDIA SET STATUS=" + toStatusAsString + " WHERE TICKET_NUMBER=";
+        for(int i = 0; i < ticketsToToggle.size(); i++)
+        {
+            sprintf(number_string,"%d",ticketsToToggle[i]);
+            std::string modify_statement = modify_statement_template + std::string(number_string) + ";";
+            sqlite_return_value = sqlite3_exec(mpDatabaseHandle, modify_statement.c_str(), dummy_callback_function, 0, &error_message);
+            std::cout << "Marked ticket #" << number_string << std::endl;
+            if(sqlite_return_value != SQLITE_OK)
+            {
+                std::cout << "Error resolving ticket number. Please file a bug.." << std::endl;
+                std::cout << "SQlite error description: " << error_message << std::endl;
+                sqlite3_free(error_message);
+            }
+        }
+    }
+    return 0;
+}		/* -----  end of method ImportData::ToggleTickets  ----- */
 

@@ -49,6 +49,7 @@ Session::Session ()
     mOutputDirectory = "./";
     mConfigDirectory = home_dir + "/" + ".config/fedora-freemedia-tool/";
     mConfigFileLocation = mConfigDirectory + "fedora-freemedia-tool.cfg";
+    mFASUsername = "";
     mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
     mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
@@ -59,22 +60,35 @@ Session::Session ()
     mListLongWhat = "all";
     mVerboseLevel = 0;
     mListToPrint.push_back(0);
+    mResetTicketNumbers.push_back(0);
+    mResolveTicketNumbers.push_back(0);
+    mModifyTicket = 0;
     mDesc.add_options()
         ("help,h", "Print this usage message.")
         ("config-file,c",boost::program_options::value<std::string>(&mConfigFileLocation)->implicit_value(mConfigFileLocation),"Configuration file\n")
         ("database,d",boost::program_options::value<std::string>(&mDatabaseFileLocation)->implicit_value(mDatabaseFileLocation.c_str()),"Complete output file path\n")
+        ("fas-username,x",boost::program_options::value<std::string>(&mFASUsername)->implicit_value(mFASUsername.c_str()),"FAS Username. Password will be asked if required.\nNo command line option is provided to enter password to avoid entering of password in plaintext on the terminal.\nUse with -u\n")
         ("import,i",boost::program_options::value<std::string>(&mInputReportFileLocation)->implicit_value(mInputReportFileLocation.c_str()),"Import data\nOptional argument: Complete input file path\n")
+        ("resolve,r",boost::program_options::value<std::vector <int> >(&mResolveTicketNumbers)->multitoken(),"Change status of provided ticket numbers to RESOLVED\n(default: 0 meaning all new tickets)\n")
+        ("reset,e",boost::program_options::value<std::vector <int> >(&mResetTicketNumbers)->multitoken(),"Change status of provided ticket numbers to PENDING\n(default: 0 meaning all fixed tickets)\n")
+        ("force,f",boost::program_options::value<std::string>()->implicit_value(""),"Force import even if the ticket exists in database\n")
         ("add-new,a",boost::program_options::value<std::string>()->implicit_value(""),"Manually add a new entry: unimplemented\n")
+        ("modify,m",boost::program_options::value<int>(&mModifyTicket),"Modify a database entry.\narg: Ticket number\n")
         ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory)->implicit_value(mOutputDirectory.c_str()),"Directory to put the printed envelopes\n")
         ("print,p",boost::program_options::value< std::vector<int> >(&mListToPrint)->multitoken(),"List of ticket numbers to print envelopes for\n(default: 0 meaning all new tickets)\n")
         ("list,l",boost::program_options::value<std::string>(&mListWhat)->implicit_value(mListWhat.c_str()),"List records in database\nall,pending,complete\n")
         ("list-long,g",boost::program_options::value<std::string>(&mListLongWhat)->implicit_value(mListLongWhat.c_str()),"List records with description\nall,pending,complete\n")
+        ("update,u",boost::program_options::value<std::string>()->implicit_value(""),"Download latest report from the trac and update the database\nThis automatically stores the information in default database directory\n")
         ("v-level,v",boost::program_options::value<int>(&mVerboseLevel)->implicit_value(mVerboseLevel),"Debug level: 1,2,3\n")
         ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name\n")
         ("sender-add,s",boost::program_options::value<std::string>(&mSendersAddress)->multitoken(),"Senders address\nUse % as a line limiter\n")
         ("template,t",boost::program_options::value<std::string>(&mEnvelopeTemplateLocation)->implicit_value(mEnvelopeTemplateLocation.c_str()),"Location of envelope template\n")
         ("version,V",boost::program_options::value<std::string>()->implicit_value(""),"Package information: version etc.")
         ;
+
+    /*  Initialize cURLpp */
+    cURLpp::initialize();
+
 
 }  /* -----  end of method Session::Session  (constructor)  ----- */
 
@@ -112,12 +126,49 @@ Session::ParseCommandLine (int argc, char **argv)
             ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
             newInstance.ImportDataToDatabase();
         }
+        else if(mVariableMap.count("resolve"))
+        {
+            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+            newInstance.ToggleTickets(mResolveTicketNumbers,"2");
+        }
+        else if(mVariableMap.count("reset"))
+        {
+            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+            newInstance.ToggleTickets(mResetTicketNumbers,"1");
+        }
+        else if(mVariableMap.count("modify"))
+        {
+            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+            newExportInstance.GetTicketInfoFromNumber(mModifyTicket);
+            std::cout << "Current information:" << std::endl;
+            newExportInstance.PrintTicketInfoFromNumber(mModifyTicket);
+
+        }
+        else if(mVariableMap.count("update"))
+        {
+            GetReport newReportToGet;
+            if(mVariableMap.count("fas-username"))
+            {
+                newReportToGet.SetUsername(mFASUsername);
+            }
+            newReportToGet.SetDownloadLocation(mInputReportFileLocation);
+            newReportToGet.DownloadReport();
+
+            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+            newInstance.ImportDataToDatabase();
+        }
         else if(mVariableMap.count("print"))
         {
             ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
             newExportInstance.ImportTemplate();
             newExportInstance.SetSendersName(SendersName());
             newExportInstance.SetSendersAddress(SendersAddress());
+            if(mListToPrint.size() == 1 && mListToPrint[0] == 0)
+            {
+                newExportInstance.GetPendingTicketNumbers();
+                mListToPrint = newExportInstance.PendingTicketNumbers();
+
+            }
             for (counter = 0; counter < mListToPrint.size(); counter++)
             {
                 if(newExportInstance.GetTicketInfoFromNumber(mListToPrint[counter]) == -1)
@@ -149,7 +200,6 @@ Session::ParseCommandLine (int argc, char **argv)
                 newExportInstance.GetAllTicketNumbers();
                 newExportInstance.PrintAllTicketNumbers();
             }
-
         }
         else if(mVariableMap.count("list-long"))
         {
@@ -171,7 +221,6 @@ Session::ParseCommandLine (int argc, char **argv)
             }
         }
     }
-
     return -1;
 }		/* -----  end of method Session::ParseCommandLine  ----- */
 
@@ -297,6 +346,13 @@ Session::PrepareSession ( )
 }		/* -----  end of method Session::PrepareSession  ----- */
 
 
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Session
+ *      Method:  Session :: PrintListAsString
+ * Description:  Debugging method
+ *--------------------------------------------------------------------------------------
+ */
     std::string
 Session::PrintListAsString ( )
 {
@@ -351,4 +407,18 @@ Session::SendersAddress ( )
 {
     return mSendersAddress;
 }		/* -----  end of method Session::SendersAddress  ----- */
+
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  Session
+ *      Method:  Session :: ~Session
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+Session::~Session ()
+{
+    cURLpp::terminate();
+}		/* -----  end of method Session::~Session  ----- */
 

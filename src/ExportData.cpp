@@ -50,7 +50,7 @@ ExportData::ExportData (std::string databaseFile, std::string outputDirectory, s
     mImageTemplateLocation = templateLocation;
     mSendersAddressStartX = 191;
     mSendersAddressStarty = 206;
-    mReceiversAddressStartX = 350;
+    mReceiversAddressStartX = 310;
     mReceiversAddressStarty = 395;
 
 }  /* -----  end of method ExportData::ExportData  (constructor)  ----- */
@@ -239,7 +239,7 @@ ExportData::GetCompleteTicketNumbers ( )
     sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
     if(sqlite_return_value == SQLITE_OK)
     {
-        std::string select_query = "SELECT TICKET_NUMBER FROM FREEMEDIA WHERE STATUS=0;";
+        std::string select_query = "SELECT TICKET_NUMBER FROM FREEMEDIA WHERE STATUS=2;";
         sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
         if(sqlite_return_value == SQLITE_OK)
         {
@@ -550,7 +550,7 @@ ExportData::OverlayTemplate (int ticketNumber)
     std::string output_file_name = OutputDirectory() + "freemediaEnvelope" + std::string(ticket_number_string) + ".png";
 
     mDestinationImageTemplate = mImageTemplate;
-    mDestinationImageTemplate.fontPointsize(12);
+    mDestinationImageTemplate.fontPointsize(13);
 
     mDestinationImageTemplate.draw(Magick::DrawableText(mSendersAddressStartX,mSendersAddressStarty + 14,mSendersName.c_str()));
     for (i = 0; i < formatted_address.size(); i++)
@@ -571,7 +571,7 @@ ExportData::OverlayTemplate (int ticketNumber)
     {
         mDestinationImageTemplate.draw(Magick::DrawableText(mReceiversAddressStartX,mReceiversAddressStarty + (i + 1) * 14,formatted_address[i].c_str()));
     }
-    mDestinationImageTemplate.display();
+//    mDestinationImageTemplate.display();
     mDestinationImageTemplate.write(output_file_name.c_str());
     std::cout << "Printed envelope for ticket number " << ticketNumber << " to " << output_file_name  << "." << std::endl;
     return 0;
@@ -615,7 +615,7 @@ ExportData::SetSendersAddress (std::string sendersAddress )
  * Description:  
  *--------------------------------------------------------------------------------------
  */
-std::string
+    std::string
 ExportData::OutputDirectory ( )
 {
     return mOutputDirectory;
@@ -682,4 +682,19 @@ ExportData::PrintCompleteTickets ( )
     }
     return ;
 }		/* -----  end of method ExportData::PrintCompleteTickets  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PendingTicketNumbers
+ * Description:  Need this to implement one of the options
+ *--------------------------------------------------------------------------------------
+ */
+    std::vector<int>
+ExportData::PendingTicketNumbers ( )
+{
+    return mPendingTicketNumbers;
+}		/* -----  end of method ExportData::PendingTicketNumbers  ----- */
+
 
