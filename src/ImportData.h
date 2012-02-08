@@ -42,6 +42,7 @@
 #include	<cctype>
 #include	<sqlite3.h>
 #include	<vector>
+#include	<exception>
 
 
 /*
@@ -60,6 +61,7 @@ class ImportData
 
     /* ====================  MUTATORS      ======================================= */
     void ImportDataToDatabase();
+    int FileIsSane();
     int ModifyEntry(int ticketNumber);
     int ToggleTickets(std::vector <int> ticketsToToggle, std::string toStatusAsString);
 
@@ -69,6 +71,8 @@ class ImportData
     /* ====================  DATA MEMBERS  ======================================= */
 
     private:
+    void PrintMalformedErrors();
+    void PrintMalformedErrors(int lineCount, int recordCount);
     std::string SanitizeSummary(std::string summaryToStrip);
     std::string ReplaceAll(std::string str,const std::string from, const std::string to);
     std::string MediaCode(std::string stringMediaName);
@@ -102,5 +106,6 @@ class ImportData
  * status: 
  * 1 -> new
  * 2 -> fixed
+ * 3 -> assigned to a local contact
  *
  */

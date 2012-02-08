@@ -36,6 +36,7 @@
 #include	"ImportData.h"
 #include	"ExportData.h"
 #include	"Session.h"
+#include	<exception>
 
 /* 
  * ===  FUNCTION  ======================================================================
@@ -46,16 +47,23 @@
     int
 main ( int argc, char *argv[] )
 {
-    Session currentSession; 
-    if (currentSession.ParseCommandLine(argc, argv) == -1)
-       return EXIT_SUCCESS;
-    else
-    {
-        /*  write a better error message! */
-        std::cout << "Something went wrong. Please file a bug" << std::endl;
-        return EXIT_SUCCESS;
+//    try 
+//    {
+        Session currentSession; 
+        if (currentSession.ParseCommandLine(argc, argv) == -1)
+           return EXIT_SUCCESS;
+        else
+        {
+            /*  write a better error message! */
+            std::cout << "Something went wrong. Please file a bug" << std::endl;
+            return EXIT_SUCCESS;
 
-    }
+        }
+//    }
+//    catch (std::exception &e)
+//    {
+//        std::cout << "An exception occured, please file a bug and list what you did: " << e.what() << std::endl;
+//    }
 
     return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */

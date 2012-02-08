@@ -53,7 +53,7 @@ Session::Session ()
     mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
     mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
-    mEnvelopeTemplateLocation = "/usr/share/fedora-freemedia-tool/Freemedia-mailer.png";
+    mEnvelopeTemplateLocation = "DATADIR"  "/fedora-freemedia-tool/Freemedia-mailer.png";
     mSendersName = "Free media contributors name comes here!";
     mSendersAddress = "Address with %precent sign as %line break comes here!%";
     mListWhat = "all";
@@ -62,6 +62,7 @@ Session::Session ()
     mListToPrint.push_back(0);
     mResetTicketNumbers.push_back(0);
     mResolveTicketNumbers.push_back(0);
+    mAssignLCNumbers.push_back(0);
     mModifyTicket = 0;
     mDesc.add_options()
         ("help,h", "Print this usage message.")
@@ -71,13 +72,14 @@ Session::Session ()
         ("import,i",boost::program_options::value<std::string>(&mInputReportFileLocation)->implicit_value(mInputReportFileLocation.c_str()),"Import data\nOptional argument: Complete input file path\n")
         ("resolve,r",boost::program_options::value<std::vector <int> >(&mResolveTicketNumbers)->multitoken(),"Change status of provided ticket numbers to RESOLVED\n(default: 0 meaning all new tickets)\n")
         ("reset,e",boost::program_options::value<std::vector <int> >(&mResetTicketNumbers)->multitoken(),"Change status of provided ticket numbers to PENDING\n(default: 0 meaning all fixed tickets)\n")
+        ("assign-to-lc,A",boost::program_options::value<std::vector <int> >(&mAssignLCNumbers)->multitoken(),"Assign these tickets to a Local Contact\n(default: 0 meaning all)\n)")
         ("force,f",boost::program_options::value<std::string>()->implicit_value(""),"Force import even if the ticket exists in database\n")
         ("add-new,a",boost::program_options::value<std::string>()->implicit_value(""),"Manually add a new entry: unimplemented\n")
         ("modify,m",boost::program_options::value<int>(&mModifyTicket),"Modify a database entry.\narg: Ticket number\n")
         ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory)->implicit_value(mOutputDirectory.c_str()),"Directory to put the printed envelopes\n")
         ("print,p",boost::program_options::value< std::vector<int> >(&mListToPrint)->multitoken(),"List of ticket numbers to print envelopes for\n(default: 0 meaning all new tickets)\n")
-        ("list,l",boost::program_options::value<std::string>(&mListWhat)->implicit_value(mListWhat.c_str()),"List records in database\nall,pending,complete\n")
-        ("list-long,g",boost::program_options::value<std::string>(&mListLongWhat)->implicit_value(mListLongWhat.c_str()),"List records with description\nall,pending,complete\n")
+        ("list,l",boost::program_options::value<std::string>(&mListWhat)->implicit_value(mListWhat.c_str()),"List records in database\nall,pending,complete,local-contact\n")
+        ("list-long,L",boost::program_options::value<std::string>(&mListLongWhat)->implicit_value(mListLongWhat.c_str()),"List records with description\nall,pending,complete,local-contact\n")
         ("update,u",boost::program_options::value<std::string>()->implicit_value(""),"Download latest report from the trac and update the database\nThis automatically stores the information in default database directory\n")
         ("v-level,v",boost::program_options::value<int>(&mVerboseLevel)->implicit_value(mVerboseLevel),"Debug level: 1,2,3\n")
         ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name\n")
@@ -115,7 +117,7 @@ Session::ParseCommandLine (int argc, char **argv)
     else if(mVariableMap.count("version"))
     {
         std::cout << PACKAGE_NAME  << " Version: " << VERSION << std::endl;
-        std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << std::endl;
+        std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << "!!" << std::endl;
     }
     else {
         if(PrepareSession() == -1)
@@ -124,7 +126,10 @@ Session::ParseCommandLine (int argc, char **argv)
         if (mVariableMap.count("import"))
         {
             ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            newInstance.ImportDataToDatabase();
+            if(newInstance.FileIsSane())
+            {
+                newInstance.ImportDataToDatabase();
+            }
         }
         else if(mVariableMap.count("resolve"))
         {
@@ -135,6 +140,11 @@ Session::ParseCommandLine (int argc, char **argv)
         {
             ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
             newInstance.ToggleTickets(mResetTicketNumbers,"1");
+        }
+        else if(mVariableMap.count("assign-to-lc"))
+        {
+            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+            newInstance.ToggleTickets(mAssignLCNumbers,"3");
         }
         else if(mVariableMap.count("modify"))
         {
@@ -155,7 +165,10 @@ Session::ParseCommandLine (int argc, char **argv)
             newReportToGet.DownloadReport();
 
             ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            newInstance.ImportDataToDatabase();
+            if(newInstance.FileIsSane())
+            {
+                newInstance.ImportDataToDatabase();
+            }
         }
         else if(mVariableMap.count("print"))
         {
@@ -195,6 +208,11 @@ Session::ParseCommandLine (int argc, char **argv)
                 newExportInstance.GetCompleteTicketNumbers();
                 newExportInstance.PrintCompleteTicketNumbers();
             }
+            else if(mListWhat == "local-contact")
+            {
+                newExportInstance.GetLocalContactTicketNumbers();
+                newExportInstance.PrintLocalContactTicketNumbers();
+            }
             else
             {
                 newExportInstance.GetAllTicketNumbers();
@@ -213,6 +231,11 @@ Session::ParseCommandLine (int argc, char **argv)
             {
                 newExportInstance.GetCompleteTicketNumbers();
                 newExportInstance.PrintCompleteTickets();
+            }
+            else if(mListLongWhat == "local-contact")
+            {
+                newExportInstance.GetLocalContactTicketNumbers();
+                newExportInstance.PrintLocalContactTickets();
             }
             else
             {

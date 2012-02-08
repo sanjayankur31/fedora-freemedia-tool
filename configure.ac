@@ -7,10 +7,10 @@ dnl
 dnl Copyright Ankur Sinha: Franciscod 2011
 
 
-AC_INIT([fedora-freemedia-tools],[0.1-alpha],[ankursinha@fedoraproject.org], , [http://gitorious.org/fedora-freemedia-tools])
+AC_INIT([fedora-freemedia-tools],[0.1-alpha],[sanjay DOT ankur AT gmail DOT com],fedora-freemedia-tool, [https://gitorious.org/fedora-freemedia-tool])
 AM_INIT_AUTOMAKE([-W -Wall -Werror dist-bzip2 dist-zip check-news])
-PACKAGE=fft
-AC_CONFIG_SRCDIR([src/test.cpp])
+PACKAGE=ffmt
+AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADER(config.h)
 
 AM_MAINTAINER_MODE    
@@ -35,6 +35,10 @@ AC_ARG_WITH([boost-lib-path],
             [BOOST_LIBS="-L$withval -lboost_program_options"],
             [BOOST_LIBS='-lboost_program_options'])
 AC_SUBST([BOOST_LIBS])
+
+dnl AC_DEFINE_UNQUOTED([DATADIR], ["$datadir"], [Define to the read-only architecture-independent data directory.])
+dnl AC_SUBST([DATADIR])
+
 
 AC_CONFIG_FILES([Makefile src/Makefile])    
 AC_OUTPUT

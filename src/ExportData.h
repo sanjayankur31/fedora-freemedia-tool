@@ -65,6 +65,8 @@ class ExportData
     void PrintPendingTicketNumbers();
     void PrintPendingTickets();
     void PrintCompleteTicketNumbers();
+    void PrintLocalContactTicketNumbers();
+    void PrintLocalContactTickets();
     void PrintCompleteTickets();
     std::vector<int> PendingTicketNumbers();
 
@@ -72,6 +74,7 @@ class ExportData
     void GetAllTicketNumbers();
     void GetPendingTicketNumbers();
     void GetCompleteTicketNumbers();
+    void GetLocalContactTicketNumbers();
     int NumberOfPendingTickets();
     int NumberOfTotalTickets();
     int NumberOfCompleteTickets();
@@ -103,6 +106,7 @@ class ExportData
     std::vector <int> mAllTicketNumbers;
     std::vector <int> mPendingTicketNumbers;
     std::vector <int> mCompleteTicketNumbers;
+    std::vector <int> mLocalContactTicketNumbers;
     std::map <int, std::string > mNameMap;
     std::map <int, std::string > mAddressMap;
     std::map <int, std::string > mRequirementMap;
@@ -111,6 +115,7 @@ class ExportData
     int mNumberOfPendingTickets;
     int mNumberOfCompleteTickets;
     int mNumberOfTotalTickets;
+    int mNumberOfLocalContactTickets;
     Magick::Image mImageTemplate;
     Magick::Image mDestinationImageTemplate;
     int mSendersAddressStartX;

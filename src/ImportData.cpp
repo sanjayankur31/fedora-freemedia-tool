@@ -121,7 +121,6 @@ ImportData::ImportDataToDatabase ()
     bool in_address = false;
     char* error_message;
     int record_count = 0;
-
     if(sqlite_return_value != SQLITE_OK)
     {
 
@@ -134,6 +133,7 @@ ImportData::ImportDataToDatabase ()
     if (mDataFileHandle.good())
     {
         /*  discard header line */
+        temp_buffer.clear();
         getline(mDataFileHandle,temp_buffer);
 
         while(mDataFileHandle.good() && !mDataFileHandle.eof())
@@ -147,6 +147,13 @@ ImportData::ImportDataToDatabase ()
 
             if(temp_buffer.empty())
                 continue;
+            else if (temp_buffer.find("Assigned,") != 0)
+            {
+                std::cout << "[X] Possible extraneous line:\n" << temp_buffer << std::endl;
+                std::cout << "[X] Skipping. Reimport after correcting format.\n";
+                record_count--;
+                continue;
+            }
 
             /*  iterate and simply tokenize
              *
@@ -181,31 +188,56 @@ ImportData::ImportDataToDatabase ()
                 comma_start = string_iterator;
                 }
             }
-            /*  using % as a place holder for a \c\r */
-            std::string insert_statement = "INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(string_tokens[6],"[[BR]]",",%"),", ",",")," ,",","),",,",",")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');";
-//            std::cout << "SQL statement is: " << insert_statement << std::endl;
-
-            sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
-            /*  duplicate entries */
-            if(sqlite_return_value == SQLITE_CONSTRAINT)
+            if(string_tokens.size() != 7)
             {
-                std::cout << "Ticket " + string_tokens[1] + " already exists in table, skipping." << std::endl;
+                std::cout << "[X] Malformed Line in report. Correct and re-import" << std::endl;
+                PrintMalformedErrors();
+                record_count--;
+                continue;
             }
-            else if(sqlite_return_value != SQLITE_OK)
+            /*  using % as a place holder for a \c\r */
+            try 
             {
-                std::cout << "Error inserting data to table in database. Please file a bug.." << std::endl;
-                std::cout << "SQlite error description: " << sqlite_return_value << ": " << error_message << std::endl;
-                sqlite3_free(error_message);
+                std::string insert_statement = ("INSERT INTO FREEMEDIA VALUES (" + string_tokens[1] + ", '" + string_tokens[2] + "', '" + SanitizeAddress(ReplaceAll(ReplaceAll(ReplaceAll(ReplaceAll(string_tokens[6],"[[BR]]",",%"),", ",",")," ,",","),",,",",")) + "', " + MediaCode(string_tokens[3]) + ", 1, '');");
+    //            std::cout << "SQL statement is: " << insert_statement << std::endl;
+
+                sqlite_return_value = sqlite3_exec(mpDatabaseHandle, insert_statement.c_str(), dummy_callback_function, 0, &error_message);
+                /*  duplicate entries */
+                if(sqlite_return_value == SQLITE_CONSTRAINT)
+                {
+                    std::cout << "[+] Ticket " + string_tokens[1] + " already exists in table, skipping." << std::endl;
+                }
+                else if(sqlite_return_value != SQLITE_OK)
+                {
+                    std::cout << "Error inserting data to table in database. Please file a bug.." << std::endl;
+                    std::cout << "SQlite error description: " << sqlite_return_value << ": " << error_message << std::endl;
+                    sqlite3_free(error_message);
+                }
+            }
+            catch (std::bad_alloc &e)
+            {
+                std::cout << "[X] An exception occured while trying to insert ticket number " + string_tokens[1] + " into the database. Please intimate the maintainer.\n";
+                std::cout << "[X] This is generally caused when the string being allocated is too long. Please reformat the address in the ticket and retry\n";
+                record_count--;
+                continue;
+
+            }
+            catch (std::exception &e)
+            {
+                std::cout << "[X] An exception occured while trying to insert ticket number " + string_tokens[1] + " into the database. Please intimate the maintainer.\n";
+                std::cout << "[X] Exception: \"" << e.what() << "\" at the insert statment creation code line\n";
+                record_count--;
+                continue;
             }
         }
     }
     else
     {
-        std::cout << "Input file not found! Please recheck the location provided.." << std::endl;
+        std::cout << "[X] Input file not found! Please recheck the location provided.." << std::endl;
     }
     mDataFileHandle.close();
     sqlite3_close(mpDatabaseHandle);
-    std::cout << record_count << " records successfully imported into database." << std::endl;
+    std::cout << "[+] " << record_count -1 << " records successfully imported into database." << std::endl; /* One extra in last loop somehow */
     return ;
 }		/* -----  end of method ImportData::ImportDataToDatabase  ----- */
 
@@ -396,4 +428,83 @@ ImportData::ToggleTickets (std::vector <int> ticketsToToggle , std::string toSta
     }
     return 0;
 }		/* -----  end of method ImportData::ToggleTickets  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ImportData
+ *      Method:  ImportData :: FileIsSane
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+
+    int
+ImportData::FileIsSane ( )
+{
+    int record_count = 0;
+    int line_count = 0;
+    std::string temp_buffer = "";
+
+    mDataFileHandle.open(mDataFile.c_str());
+    if (mDataFileHandle.good())
+    {
+        /*  discard header line */
+
+        while(mDataFileHandle.good() && !mDataFileHandle.eof())
+        {
+            temp_buffer.clear();
+            getline(mDataFileHandle,temp_buffer);
+            if(temp_buffer.find("Assigned,") == 0)
+            {
+                record_count++;
+            }
+            line_count++;
+        }
+        line_count--;                           /* increases in the last loop run somehow */
+    }
+    else
+    {
+        std::cout << "[X] Input file not found! Please recheck the location provided.." << std::endl;
+    }
+
+    if(line_count != (record_count +1))
+    {
+        PrintMalformedErrors(line_count,record_count);
+        return 0;
+    }
+    else
+    {
+        std::cout << "[+] File seems well formatted. Proceeding to import.\n";
+    }
+    mDataFileHandle.close();
+    return 1;
+}		/* -----  end of method ImportData::FileIsSane  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ImportData
+ *      Method:  ImportData :: PrintMalformedErrors
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+
+    void
+ImportData::PrintMalformedErrors (int lineCount, int recordCount )
+{
+    PrintMalformedErrors();
+    std::cout << "[X] Number of lines in file without header is " << lineCount - 1 << " while number of records found is " << recordCount << std::endl;
+    std::cout << "[X] The difference suggests that some records are malformed. Please correct the records and use the -i option to import to database\n";
+    return ;
+}		/* -----  end of method ImportData::PrintMalformedErrors  ----- */
+
+
+    void
+ImportData::PrintMalformedErrors ()
+{
+    std::cout << "File format should be:\n1.1st line is a header\n2.One record per line (including address)\n3.Please ensure description consists only of address (personal message from requestor if any should be removed)\n4.Each new address line begins with a \",[[BR]]\"\n";
+    std::cout << "Example: <Assigned,1234,Ankur from INDIA wants a i386 DVD.,,i386 DVD,,,,2011-08-04T15:22:56Z,2012-02-08T06:49:14Z,\"Ankur,[[BR]]Flat number, Apt Name, [[BR]]Street, Town, Locality [[BR]]State, Region, PIN [[BR]]Country.[[BR]] \",email@… >\n";
+
+    return ;
+}		/* -----  end of method ImportData::PrintMalformedErrors  ----- */
 

@@ -421,6 +421,10 @@ ExportData::StatusToString (int status )
     {
         return std::string("FIXED");
     }
+    else if(status == 3)
+    {
+        return std::string("Assigned to Local Contact");
+    }
     return std::string("Unknown status");
 }		/* -----  end of method ExportData::StatusToString  ----- */
 
@@ -698,3 +702,96 @@ ExportData::PendingTicketNumbers ( )
 }		/* -----  end of method ExportData::PendingTicketNumbers  ----- */
 
 
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: GetLocalContactTicketNumbers
+ * Description:  Get a list of all the complete tickets
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::GetLocalContactTicketNumbers ( )
+{
+    int sqlite_return_value = 0;
+    char* error_message;
+    const char *dummy;
+
+    mLocalContactTicketNumbers.clear();
+
+    sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+    if(sqlite_return_value == SQLITE_OK)
+    {
+        std::string select_query = "SELECT TICKET_NUMBER FROM FREEMEDIA WHERE STATUS=3;";
+        sqlite_return_value = sqlite3_prepare_v2(mpDatabaseHandle, (const char*)select_query.c_str(),select_query.size(),&mpStatementHandle,&dummy);
+        if(sqlite_return_value == SQLITE_OK)
+        {
+            do
+            {
+                sqlite_return_value = sqlite3_step(mpStatementHandle);
+                if(sqlite_return_value == SQLITE_ERROR)
+                {
+                    std::cout << "Error stepping returned rows" << std::endl;
+                    std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                    sqlite3_close(mpDatabaseHandle);
+                    return;
+
+                }
+                mLocalContactTicketNumbers.push_back(sqlite3_column_int(mpStatementHandle,0));
+            }while(sqlite_return_value != SQLITE_DONE);
+
+        }
+        else
+        {
+            std::cout << "Error preparing select query" << std::endl;
+            std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_close(mpDatabaseHandle);
+        }
+
+    }
+    /*  why is this extra 0 being added? sqlite quirkyness? */
+    mLocalContactTicketNumbers.pop_back();
+    mNumberOfLocalContactTickets = mLocalContactTicketNumbers.size();
+    sqlite3_close(mpDatabaseHandle);
+    return ;
+}		/* -----  end of method ExportData::GetLocalContactTicketNumbers  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintLocalContactTicketNumbers
+ * Description:  Print the list
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintLocalContactTicketNumbers ( )
+{
+    std::cout << "Tickets in data base assigned to local contacts (ticket numbers only): " << mNumberOfLocalContactTickets << std::endl;
+    if(mLocalContactTicketNumbers.empty())
+    {
+        std::cout << "Either the retrieval method has not been called, or there are no complete tickets in the database!" << std::endl;
+        return;
+    }
+    PrintVectorContents(mLocalContactTicketNumbers);
+    return ;
+}		/* -----  end of method ExportData::PrintLocalContactTicketNumbers  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintLocalContactTickets
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintLocalContactTickets ( )
+{
+    GetLocalContactTicketNumbers();
+
+    for(int i = 0; i < mLocalContactTicketNumbers.size(); i++)
+    {
+        GetTicketInfoFromNumber(mLocalContactTicketNumbers[i]);
+        PrintTicketInfoFromNumber(mLocalContactTicketNumbers[i]);
+    }
+    return ;
+}		/* -----  end of method ExportData::PrintLocalContactTickets  ----- */

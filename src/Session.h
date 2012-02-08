@@ -101,6 +101,7 @@ class Session
     std::vector<int> mListToPrint;
     std::vector<int> mResolveTicketNumbers;
     std::vector<int> mResetTicketNumbers;
+    std::vector<int> mAssignLCNumbers;
     int mVerboseLevel;
     int mModifyTicket;
     boost::program_options::variables_map mVariableMap;
