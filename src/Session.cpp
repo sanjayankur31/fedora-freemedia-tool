@@ -48,7 +48,7 @@ Session::Session ()
     std::string home_dir ((const char *)getenv("HOME"));
     mOutputDirectory = "./";
     mConfigDirectory = home_dir + "/" + ".config/fedora-freemedia-tool/";
-    mConfigFileLocation = mConfigDirectory + "fedora-freemedia-tool.cfg";
+    mConfigFileLocation = mConfigDirectory + "config.cfg";
     mFASUsername = "";
     mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
@@ -104,145 +104,167 @@ Session::Session ()
     int
 Session::ParseCommandLine (int argc, char **argv)
 {
-    boost::program_options::store(boost::program_options::parse_command_line(argc, argv, mDesc), mVariableMap);
-    /*  notify required to save the values into my variables. */
-    /*  TODO: confirm this behaviour */
-    boost::program_options::notify(mVariableMap);
-    int counter;
-
-    if (mVariableMap.count("help")) 
+    try
     {
-        std::cout << mDesc << std::endl;
-    }
-    else if(mVariableMap.count("version"))
-    {
-        std::cout << PACKAGE_NAME  << " Version: " << VERSION << std::endl;
-        std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << "!!" << std::endl;
-    }
-    else {
-        if(PrepareSession() == -1)
-            return 0;
+        int counter;
+        /*  notify required to save the values into my variables. */
+        /*  TODO: confirm this behaviour */
 
-        if (mVariableMap.count("import"))
-        {
-            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            if(newInstance.FileIsSane())
-            {
-                newInstance.ImportDataToDatabase();
-            }
-        }
-        else if(mVariableMap.count("resolve"))
-        {
-            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            newInstance.ToggleTickets(mResolveTicketNumbers,"2");
-        }
-        else if(mVariableMap.count("reset"))
-        {
-            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            newInstance.ToggleTickets(mResetTicketNumbers,"1");
-        }
-        else if(mVariableMap.count("assign-to-lc"))
-        {
-            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            newInstance.ToggleTickets(mAssignLCNumbers,"3");
-        }
-        else if(mVariableMap.count("modify"))
-        {
-            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
-            newExportInstance.GetTicketInfoFromNumber(mModifyTicket);
-            std::cout << "Current information:" << std::endl;
-            newExportInstance.PrintTicketInfoFromNumber(mModifyTicket);
+        boost::program_options::store(boost::program_options::parse_command_line(argc, argv, mDesc), mVariableMap);
+        boost::program_options::notify(mVariableMap);
 
-        }
-        else if(mVariableMap.count("update"))
+        std::ifstream config_file_handle(mConfigFileLocation.c_str());
+        if(!config_file_handle)
         {
-            GetReport newReportToGet;
-            if(mVariableMap.count("fas-username"))
-            {
-                newReportToGet.SetUsername(mFASUsername);
-            }
-            newReportToGet.SetDownloadLocation(mInputReportFileLocation);
-            newReportToGet.DownloadReport();
-
-            ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-            if(newInstance.FileIsSane())
-            {
-                newInstance.ImportDataToDatabase();
-            }
+            std::cout << "[X] No config file found at: " << mConfigFileLocation << std::endl;
         }
-        else if(mVariableMap.count("print"))
+        else
         {
-            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
-            newExportInstance.ImportTemplate();
-            newExportInstance.SetSendersName(SendersName());
-            newExportInstance.SetSendersAddress(SendersAddress());
-            if(mListToPrint.size() == 1 && mListToPrint[0] == 0)
-            {
-                newExportInstance.GetPendingTicketNumbers();
-                mListToPrint = newExportInstance.PendingTicketNumbers();
+            std::cout << "[+] Parsing available options from config file: " << mConfigFileLocation << std::endl;
+            boost::program_options::store(boost::program_options::parse_config_file(config_file_handle,mDesc),mVariableMap);
+        }
+        boost::program_options::notify(mVariableMap);
 
-            }
-            for (counter = 0; counter < mListToPrint.size(); counter++)
+        if (mVariableMap.count("help")) 
+        {
+            std::cout << mDesc << std::endl;
+        }
+        else if(mVariableMap.count("version"))
+        {
+            std::cout << PACKAGE_NAME  << " Version: " << VERSION << std::endl;
+            std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << "!!" << std::endl;
+        }
+        else 
+        {
+            if(PrepareSession() == -1)
+                return 0;
+
+            if (mVariableMap.count("import"))
             {
-                if(newExportInstance.GetTicketInfoFromNumber(mListToPrint[counter]) == -1)
-                    std::cout << "Could not find data on ticket " << mListToPrint[counter] << " in database." << std::endl;
-                else
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                if(newInstance.FileIsSane())
                 {
-                    if(newExportInstance.OverlayTemplate(mListToPrint[counter]) == -1)
+                    newInstance.ImportDataToDatabase();
+                }
+            }
+            else if(mVariableMap.count("resolve"))
+            {
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                newInstance.ToggleTickets(mResolveTicketNumbers,"2");
+            }
+            else if(mVariableMap.count("reset"))
+            {
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                newInstance.ToggleTickets(mResetTicketNumbers,"1");
+            }
+            else if(mVariableMap.count("assign-to-lc"))
+            {
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                newInstance.ToggleTickets(mAssignLCNumbers,"3");
+            }
+            else if(mVariableMap.count("modify"))
+            {
+                ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+                newExportInstance.GetTicketInfoFromNumber(mModifyTicket);
+                std::cout << "Current information:" << std::endl;
+                newExportInstance.PrintTicketInfoFromNumber(mModifyTicket);
+
+            }
+            else if(mVariableMap.count("update"))
+            {
+                GetReport newReportToGet;
+                if(mVariableMap.count("fas-username"))
+                {
+                    newReportToGet.SetUsername(mFASUsername);
+                }
+                newReportToGet.SetDownloadLocation(mInputReportFileLocation);
+                newReportToGet.DownloadReport();
+
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                if(newInstance.FileIsSane())
+                {
+                    newInstance.ImportDataToDatabase();
+                }
+            }
+            else if(mVariableMap.count("print"))
+            {
+                ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+                newExportInstance.ImportTemplate();
+                newExportInstance.SetSendersName(SendersName());
+                newExportInstance.SetSendersAddress(SendersAddress());
+                if(mListToPrint.size() == 1 && mListToPrint[0] == 0)
+                {
+                    newExportInstance.GetPendingTicketNumbers();
+                    mListToPrint = newExportInstance.PendingTicketNumbers();
+
+                }
+                for (counter = 0; counter < mListToPrint.size(); counter++)
+                {
+                    if(newExportInstance.GetTicketInfoFromNumber(mListToPrint[counter]) == -1)
+                        std::cout << "Could not find data on ticket " << mListToPrint[counter] << " in database." << std::endl;
+                    else
                     {
-                        std::cout << "Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
+                        if(newExportInstance.OverlayTemplate(mListToPrint[counter]) == -1)
+                        {
+                            std::cout << "Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
+                        }
                     }
                 }
             }
+            else if(mVariableMap.count("list"))
+            {
+                ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+                if(mListWhat == "pending")
+                {
+                    newExportInstance.GetPendingTicketNumbers();
+                    newExportInstance.PrintPendingTicketNumbers();
+                }
+                else if(mListWhat == "complete")
+                {
+                    newExportInstance.GetCompleteTicketNumbers();
+                    newExportInstance.PrintCompleteTicketNumbers();
+                }
+                else if(mListWhat == "local-contact")
+                {
+                    newExportInstance.GetLocalContactTicketNumbers();
+                    newExportInstance.PrintLocalContactTicketNumbers();
+                }
+                else
+                {
+                    newExportInstance.GetAllTicketNumbers();
+                    newExportInstance.PrintAllTicketNumbers();
+                }
+            }
+            else if(mVariableMap.count("list-long"))
+            {
+                ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+                if(mListLongWhat == "pending")
+                {
+                    newExportInstance.GetPendingTicketNumbers();
+                    newExportInstance.PrintPendingTickets();
+                }
+                else if(mListLongWhat == "complete")
+                {
+                    newExportInstance.GetCompleteTicketNumbers();
+                    newExportInstance.PrintCompleteTickets();
+                }
+                else if(mListLongWhat == "local-contact")
+                {
+                    newExportInstance.GetLocalContactTicketNumbers();
+                    newExportInstance.PrintLocalContactTickets();
+                }
+                else
+                {
+                    newExportInstance.GetAllTicketNumbers();
+                    newExportInstance.PrintAllTickets();
+                }
+            }
         }
-        else if(mVariableMap.count("list"))
-        {
-            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
-            if(mListWhat == "pending")
-            {
-                newExportInstance.GetPendingTicketNumbers();
-                newExportInstance.PrintPendingTicketNumbers();
-            }
-            else if(mListWhat == "complete")
-            {
-                newExportInstance.GetCompleteTicketNumbers();
-                newExportInstance.PrintCompleteTicketNumbers();
-            }
-            else if(mListWhat == "local-contact")
-            {
-                newExportInstance.GetLocalContactTicketNumbers();
-                newExportInstance.PrintLocalContactTicketNumbers();
-            }
-            else
-            {
-                newExportInstance.GetAllTicketNumbers();
-                newExportInstance.PrintAllTicketNumbers();
-            }
-        }
-        else if(mVariableMap.count("list-long"))
-        {
-            ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
-            if(mListLongWhat == "pending")
-            {
-                newExportInstance.GetPendingTicketNumbers();
-                newExportInstance.PrintPendingTickets();
-            }
-            else if(mListLongWhat == "complete")
-            {
-                newExportInstance.GetCompleteTicketNumbers();
-                newExportInstance.PrintCompleteTickets();
-            }
-            else if(mListLongWhat == "local-contact")
-            {
-                newExportInstance.GetLocalContactTicketNumbers();
-                newExportInstance.PrintLocalContactTickets();
-            }
-            else
-            {
-                newExportInstance.GetAllTicketNumbers();
-                newExportInstance.PrintAllTickets();
-            }
-        }
+        config_file_handle.close();
+    }
+    catch(std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
     }
     return -1;
 }		/* -----  end of method Session::ParseCommandLine  ----- */
@@ -323,15 +345,15 @@ Session::PrepareSession ( )
             {
                 if(errno != EEXIST)
                 {
-                    std::cout << "Error creating " << mConfigDirectory << " directory. Please report a bug" << std::endl;
+                    std::cout << "[X] Error creating " << mConfigDirectory << " directory. Please report a bug" << std::endl;
                     return -1;
                 }
                 else
-                    std::cout << mConfigDirectory << " already exists. Continuing.." << std::endl;
+                    std::cout << "[+] " << mConfigDirectory << " already exists. Continuing.." << std::endl;
             }
             else
             {
-                    std::cout << "Creating " << mConfigDirectory << " directory.." << std::endl;
+                    std::cout << "[+] Creating " << mConfigDirectory << " directory.." << std::endl;
 
             }
         }
@@ -342,7 +364,7 @@ Session::PrepareSession ( )
     {
         if(errno != EEXIST)
         {
-            std::cout << "Error creating ~/.local/share directory. Please report a bug" << std::endl;
+            std::cout << "[X] Error creating ~/.local/share directory. Please report a bug" << std::endl;
             return -1;
         }
         else 
@@ -351,15 +373,15 @@ Session::PrepareSession ( )
             {
                 if(errno != EEXIST)
                 {
-                    std::cout << "Error creating " << mUserDataDirectory << " directory. Please report a bug" << std::endl;
+                    std::cout << "[X] Error creating " << mUserDataDirectory << " directory. Please report a bug" << std::endl;
                     return -1;
                 }
                 else
-                    std::cout << mUserDataDirectory << " already exists. Continuing.." << std::endl;
+                    std::cout << "[+] " << mUserDataDirectory << " already exists. Continuing.." << std::endl;
             }
             else
             {
-                    std::cout << "Creating " << mUserDataDirectory << " directory.." << std::endl;
+                    std::cout << "[+] Creating " << mUserDataDirectory << " directory.." << std::endl;
 
             }
         }

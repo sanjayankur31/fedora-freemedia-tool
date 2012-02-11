@@ -62,9 +62,9 @@ ImportData::ImportData (std::string dataFile, std::string databaseFile)
 //    std::cout << home_dir << std::endl << mConfigDirectory << std::endl << mUserDataDirectory << std::endl;
 
     mDataFile = dataFile;
-    std::cout << "Datafile set to: " << mDataFile << std::endl;
+    std::cout << "[+] Datafile set to: " << mDataFile << std::endl;
     mDatabaseFile = databaseFile;
-    std::cout << "Databasefile set to: " << mDatabaseFile << std::endl;
+    std::cout << "[+] Databasefile set to: " << mDatabaseFile << std::endl;
      /*
      *  - csv, tsv
      *  TODO: xml */
@@ -78,7 +78,7 @@ ImportData::ImportData (std::string dataFile, std::string databaseFile)
     std::ifstream temporary_stream(databaseFile.c_str());
     if(temporary_stream)
     {
-        std::cout << "Database already exists. Continuing.." << std::endl;
+        std::cout << "[+] Database already exists. Continuing.." << std::endl;
         temporary_stream.close();
     }
     else
@@ -212,6 +212,10 @@ ImportData::ImportDataToDatabase ()
                     std::cout << "Error inserting data to table in database. Please file a bug.." << std::endl;
                     std::cout << "SQlite error description: " << sqlite_return_value << ": " << error_message << std::endl;
                     sqlite3_free(error_message);
+                }
+                else
+                {
+                    std::cout << "[+] Ticket " + string_tokens[1] + " imported to the database." << std::endl;
                 }
             }
             catch (std::bad_alloc &e)
@@ -502,8 +506,8 @@ ImportData::PrintMalformedErrors (int lineCount, int recordCount )
     void
 ImportData::PrintMalformedErrors ()
 {
-    std::cout << "File format should be:\n1.1st line is a header\n2.One record per line (including address)\n3.Please ensure description consists only of address (personal message from requestor if any should be removed)\n4.Each new address line begins with a \",[[BR]]\"\n";
-    std::cout << "Example: <Assigned,1234,Ankur from INDIA wants a i386 DVD.,,i386 DVD,,,,2011-08-04T15:22:56Z,2012-02-08T06:49:14Z,\"Ankur,[[BR]]Flat number, Apt Name, [[BR]]Street, Town, Locality [[BR]]State, Region, PIN [[BR]]Country.[[BR]] \",email@… >\n";
+    std::cout << "[X] File format should be:\n1.1st line is a header\n2.One record per line (including address)\n3.Please ensure description consists only of address (personal message from requestor if any should be removed)\n4.Each new address line begins with a \",[[BR]]\"\n";
+    std::cout << "[X] Example: <Assigned,1234,Ankur from INDIA wants a i386 DVD.,,i386 DVD,,,,2011-08-04T15:22:56Z,2012-02-08T06:49:14Z,\"Ankur,[[BR]]Flat number, Apt Name, [[BR]]Street, Town, Locality ,[[BR]]State, Region, PIN ,[[BR]]Country.[[BR]] \",email@… >\n";
 
     return ;
 }		/* -----  end of method ImportData::PrintMalformedErrors  ----- */

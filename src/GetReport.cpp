@@ -96,7 +96,7 @@ GetReport::GetFASCredentials ( )
     }
     else
     {
-        std::cout << "Username :" << mFASUsername << std::endl;
+        std::cout << "Username: " << mFASUsername << std::endl;
     }
     
     mFASPassword = std::string(getpass("Password: "));
@@ -104,7 +104,7 @@ GetReport::GetFASCredentials ( )
 
     if(mFASPassword.empty() || mFASUsername.empty())
     {
-        std::cout << "Either the password or username was not entered.\nPlease re run the tool and provide correct credentials!" << std::endl;
+        std::cout << "[X] Either the password or username was not entered.\nPlease re run the tool and provide correct credentials!" << std::endl;
         return -1;
     }
     mReportURL += mFASUsername;
@@ -130,7 +130,7 @@ GetReport::DownloadReport ( )
 
     mcURLHandle.setOpt(cURLpp::Options::CookieFile(""));
     mcURLHandle.setOpt(cURLpp::Options::Url(mLoginURL));
-    mcURLHandle.setOpt(cURLpp::Options::NoProgress(1L));
+    mcURLHandle.setOpt(cURLpp::Options::NoProgress(0));
     mcURLHandle.setOpt(cURLpp::Options::UserAgent("Fedora freemedia tool using curlpp: " LIBCURLPP_VERSION));
     mcURLHandle.setOpt(curlpp::Options::SslVerifyHost(1L));
     mcURLHandle.setOpt(curlpp::Options::UserPwd(mFASUsername + ":" + mFASPassword));
