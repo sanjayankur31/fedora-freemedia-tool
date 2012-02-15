@@ -3,9 +3,9 @@ dnl
 dnl Copyright Ankur Sinha: Franciscod 2011
 
 
-AC_INIT([fedora-freemedia-tools],[0.2-alpha],[sanjay DOT ankur AT gmail DOT com],fedora-freemedia-tool, [https://gitorious.org/fedora-freemedia-tool])
+AC_INIT([fedora-freemedia-tool],[0.2alpha],[sanjay DOT ankur AT gmail DOT com],fedora-freemedia-tool, [https://gitorious.org/fedora-freemedia-tool])
 AM_INIT_AUTOMAKE([-W -Wall -Werror dist-bzip2 dist-zip check-news])
-PACKAGE=ffmt
+PACKAGE=fedora-freemedia-tool
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADER(config.h)
 
