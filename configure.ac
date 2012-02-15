@@ -36,5 +36,5 @@ dnl AC_DEFINE_UNQUOTED([DATADIR], ["$datadir"], [Define to the read-only archite
 dnl AC_SUBST([DATADIR])
 
 
-AC_CONFIG_FILES([Makefile src/Makefile])    
+AC_CONFIG_FILES([Makefile src/Makefile data/Makefile man/Makefile])    
 AC_OUTPUT
