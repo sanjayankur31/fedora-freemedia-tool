@@ -78,6 +78,7 @@ ExportData::GetAllTicketNumbers ( )
                 {
                     std::cout << "Error stepping returned rows" << std::endl;
                     std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                    sqlite3_finalize(mpStatementHandle);
                     sqlite3_close(mpDatabaseHandle);
                     return;
 
@@ -90,6 +91,7 @@ ExportData::GetAllTicketNumbers ( )
         {
             std::cout << "Error preparing select query" << std::endl;
             std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_finalize(mpStatementHandle);
             sqlite3_close(mpDatabaseHandle);
         }
 
@@ -97,6 +99,7 @@ ExportData::GetAllTicketNumbers ( )
     /*  why is this extra 0 being added? sqlite quirkyness? */
     mAllTicketNumbers.pop_back();
     mNumberOfTotalTickets = mAllTicketNumbers.size();
+    sqlite3_finalize(mpStatementHandle);
     sqlite3_close(mpDatabaseHandle);
     return ;
 }		/* -----  end of method ExportData::GetAllTicketNumbers  ----- */
@@ -153,6 +156,7 @@ ExportData::GetPendingTicketNumbers ( )
                 {
                     std::cout << "Error stepping returned rows" << std::endl;
                     std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                    sqlite3_finalize(mpStatementHandle);
                     sqlite3_close(mpDatabaseHandle);
                     return;
                 }
@@ -164,6 +168,7 @@ ExportData::GetPendingTicketNumbers ( )
         {
             std::cout << "Error preparing select query" << std::endl;
             std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_finalize(mpStatementHandle);
             sqlite3_close(mpDatabaseHandle);
         }
 
@@ -171,6 +176,7 @@ ExportData::GetPendingTicketNumbers ( )
     /*  why is this extra 0 being added? sqlite quirkyness? */
     mPendingTicketNumbers.pop_back();
     mNumberOfPendingTickets = mPendingTicketNumbers.size(); 
+    sqlite3_finalize(mpStatementHandle);
     sqlite3_close(mpDatabaseHandle);
     return ;
 }		/* -----  end of method ExportData::GetPendingTicketNumbers  ----- */
@@ -250,6 +256,7 @@ ExportData::GetCompleteTicketNumbers ( )
                 {
                     std::cout << "Error stepping returned rows" << std::endl;
                     std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                    sqlite3_finalize(mpStatementHandle);
                     sqlite3_close(mpDatabaseHandle);
                     return;
 
@@ -262,6 +269,7 @@ ExportData::GetCompleteTicketNumbers ( )
         {
             std::cout << "Error preparing select query" << std::endl;
             std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_finalize(mpStatementHandle);
             sqlite3_close(mpDatabaseHandle);
         }
 
@@ -269,6 +277,7 @@ ExportData::GetCompleteTicketNumbers ( )
     /*  why is this extra 0 being added? sqlite quirkyness? */
     mCompleteTicketNumbers.pop_back();
     mNumberOfCompleteTickets = mCompleteTicketNumbers.size();
+    sqlite3_finalize(mpStatementHandle);
     sqlite3_close(mpDatabaseHandle);
     return ;
 }		/* -----  end of method ExportData::GetCompleteTicketNumbers  ----- */
@@ -328,6 +337,7 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
             {
                 std::cout << "Could not find info on ticket number " << ticketNumber << " in the database!"  << std::endl;
                 std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                sqlite3_finalize(mpStatementHandle);
                 sqlite3_close(mpDatabaseHandle);
                 return -1;
 
@@ -348,11 +358,13 @@ ExportData::GetTicketInfoFromNumber (int ticketNumber )
         {
             std::cout << "Error preparing select query" << std::endl;
             std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_finalize(mpStatementHandle);
             sqlite3_close(mpDatabaseHandle);
             return -1;
         }
 
     }
+    sqlite3_finalize(mpStatementHandle);
     sqlite3_close(mpDatabaseHandle);
     return 0;
 }		/* -----  end of method ExportData::GetTicketInfoFromNumber  ----- */
@@ -413,19 +425,14 @@ ExportData::PrintTicketInfoFromNumber (int ticketNumber )
     std::string
 ExportData::StatusToString (int status )
 {
-    if(status == 1)
+    switch(status)
     {
-        return std::string("PENDING");
+        case 1: return std::string("PENDING");
+        case 2: return std::string("FIXED");
+        case 3: return std::string("Assigned to Local Contact");
+        case 4: return std::string("Envelope printed");
+        default: return std::string("Unknown status");
     }
-    else if(status == 2)
-    {
-        return std::string("FIXED");
-    }
-    else if(status == 3)
-    {
-        return std::string("Assigned to Local Contact");
-    }
-    return std::string("Unknown status");
 }		/* -----  end of method ExportData::StatusToString  ----- */
 
 
@@ -479,7 +486,8 @@ ExportData::BreakAddressToMultiline (std::string addressToFormat, char delimiter
             std::vector<std::string> line_broken_down = BreakAddressToMultiline(temp_buffer, ',');
             if(line_broken_down.empty())
             {
-                std::cout << "Splitter function failed to format the address.\nPlease modify the address manually and retry!" << std::endl;
+                std::cout << "[X] Splitter function failed to format the address.\nPlease modify the address manually and retry!" << std::endl;
+                std::cout << ">> TIP: Each line(delimited by '%' should be 35 characters long or less." << std::endl;
                 vector_to_return.clear();
                 return vector_to_return;
             }
@@ -546,7 +554,7 @@ ExportData::OverlayTemplate (int ticketNumber)
     formatted_address = BreakAddressToMultiline(mSendersAddress,'%');
     if(formatted_address.empty())
     {
-        std::cout << "Error printing senders address: " << mSendersAddress << ". Please recheck the value provided" << std::endl;
+        std::cout << "[X] Error printing senders address: " << mSendersAddress << ". Please recheck the value provided" << std::endl;
         return -1;
     }
     char ticket_number_string[50];
@@ -577,7 +585,7 @@ ExportData::OverlayTemplate (int ticketNumber)
     }
 //    mDestinationImageTemplate.display();
     mDestinationImageTemplate.write(output_file_name.c_str());
-    std::cout << "Printed envelope for ticket number " << ticketNumber << " to " << output_file_name  << "." << std::endl;
+    std::cout << "[+] Printed envelope for ticket number " << ticketNumber << " to " << output_file_name  << "." << std::endl;
     return 0;
 }		/* -----  end of method ExportData::OverlayTemplate  ----- */
 
@@ -732,6 +740,7 @@ ExportData::GetLocalContactTicketNumbers ( )
                 {
                     std::cout << "Error stepping returned rows" << std::endl;
                     std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+                    sqlite3_finalize(mpStatementHandle);
                     sqlite3_close(mpDatabaseHandle);
                     return;
 
@@ -744,6 +753,7 @@ ExportData::GetLocalContactTicketNumbers ( )
         {
             std::cout << "Error preparing select query" << std::endl;
             std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+            sqlite3_finalize(mpStatementHandle);
             sqlite3_close(mpDatabaseHandle);
         }
 
@@ -751,6 +761,7 @@ ExportData::GetLocalContactTicketNumbers ( )
     /*  why is this extra 0 being added? sqlite quirkyness? */
     mLocalContactTicketNumbers.pop_back();
     mNumberOfLocalContactTickets = mLocalContactTicketNumbers.size();
+    sqlite3_finalize(mpStatementHandle);
     sqlite3_close(mpDatabaseHandle);
     return ;
 }		/* -----  end of method ExportData::GetLocalContactTicketNumbers  ----- */
@@ -795,3 +806,55 @@ ExportData::PrintLocalContactTickets ( )
     }
     return ;
 }		/* -----  end of method ExportData::PrintLocalContactTickets  ----- */
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: PrintRawTicketInfoFromNumber
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::PrintRawTicketInfoFromNumber (int ticketNumber )
+{
+    std::vector<std::string> returned_vector;
+    int i = 0;
+    if(mNameMap.find(ticketNumber) == mNameMap.end()) /* Not found */
+    {
+        std::cout << std::setw(25) << "***" << std::endl;
+        std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl << std::setw(24) << ":" << " not in map, please retrieve it first." << std::endl;
+    }
+    else
+    {
+        std::cout << std::setw(25) << "***" << std::endl;
+        std::cout << std::setw(26) << "Ticket: #" << ticketNumber << std::endl;
+        std::cout << std::setw(25) << "Requester Name: " << mNameMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Requester Address(RAW): " << mAddressMap[ticketNumber] << std::endl;
+
+        std::cout << std::setw(25) << "Request: " << mRequirementMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Status: " << mStatusMap[ticketNumber] << std::endl;
+        std::cout << std::setw(25) << "Service Date: " << mServiceDateMap[ticketNumber] << std::endl;
+    }
+
+    return ;
+}		/* -----  end of method ExportData::PrintRawTicketInfoFromNumber  ----- */
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ExportData
+ *      Method:  ExportData :: CloseDatabaseConnection
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ExportData::CloseDatabaseConnection ()
+{
+    while(sqlite3_close(mpDatabaseHandle) == SQLITE_BUSY)
+    {
+        std::cout << "[+] Waiting for database connection to close" << std::endl;
+        sleep(2);
+    }
+    return ;
+}		/* -----  end of method ExportData::CloseDatabaseConnection  ----- */
+

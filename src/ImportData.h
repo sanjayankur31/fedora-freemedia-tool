@@ -62,8 +62,8 @@ class ImportData
     /* ====================  MUTATORS      ======================================= */
     void ImportDataToDatabase();
     int FileIsSane();
-    int ModifyEntry(int ticketNumber);
     int ToggleTickets(std::vector <int> ticketsToToggle, std::string toStatusAsString);
+    void ModifyTicketNumber(int ticketNumberToModify);
 
     /* ====================  OPERATORS     ======================================= */
 
@@ -107,5 +107,6 @@ class ImportData
  * 1 -> new
  * 2 -> fixed
  * 3 -> assigned to a local contact
+ * 4 -> envelope printed
  *
  */

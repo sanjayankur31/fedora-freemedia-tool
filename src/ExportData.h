@@ -38,6 +38,7 @@
 
 
 #include	<vector>
+#include	<unistd.h>
 #include	<string>
 #include	<iostream>
 #include	<sqlite3.h>
@@ -81,11 +82,13 @@ class ExportData
     void PrintTicketSummaryReport();
     int GetTicketInfoFromNumber(int ticketNumber); /* This method will get the other data for a passed ticket number from the database on demand */
     void PrintTicketInfoFromNumber(int ticketNumber);
+    void PrintRawTicketInfoFromNumber(int ticketNumber);
     void ImportTemplate();
     int OverlayTemplate(int ticketNumber);
     void SetSendersAddress(std::string sendersAddress);
     void SetSendersName(std::string sendersName);
     std::string OutputDirectory();
+    void CloseDatabaseConnection();
 
     /* ====================  OPERATORS     ======================================= */
 

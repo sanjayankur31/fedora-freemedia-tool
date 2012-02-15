@@ -36,7 +36,10 @@
 #define  SESSION_INC
 
 
-#include	"config.h"
+#ifdef HAVE_CONFIG_H
+    #include	"config.h"
+#endif
+
 #include    <boost/program_options.hpp>
 #include	<sys/stat.h>
 #include	<sys/types.h>
@@ -104,6 +107,7 @@ class Session
     std::vector<int> mAssignLCNumbers;
     int mVerboseLevel;
     int mModifyTicket;
+    int mTicketToPrintInfoFor;
     boost::program_options::variables_map mVariableMap;
     boost::program_options::options_description mDesc;
 

@@ -53,7 +53,7 @@ Session::Session ()
     mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
     mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
-    mEnvelopeTemplateLocation = "DATADIR"  "/fedora-freemedia-tool/Freemedia-mailer.png";
+    mEnvelopeTemplateLocation = DATADIR "/fedora-freemedia-tool/Freemedia-mailer.png";
     mSendersName = "Free media contributors name comes here!";
     mSendersAddress = "Address with %precent sign as %line break comes here!%";
     mListWhat = "all";
@@ -64,6 +64,7 @@ Session::Session ()
     mResolveTicketNumbers.push_back(0);
     mAssignLCNumbers.push_back(0);
     mModifyTicket = 0;
+    mTicketToPrintInfoFor = 0;
     mDesc.add_options()
         ("help,h", "Print this usage message.")
         ("config-file,c",boost::program_options::value<std::string>(&mConfigFileLocation)->implicit_value(mConfigFileLocation),"Configuration file\n")
@@ -75,8 +76,9 @@ Session::Session ()
         ("assign-to-lc,A",boost::program_options::value<std::vector <int> >(&mAssignLCNumbers)->multitoken(),"Assign these tickets to a Local Contact\n(default: 0 meaning all)\n)")
         ("force,f",boost::program_options::value<std::string>()->implicit_value(""),"Force import even if the ticket exists in database\n")
         ("add-new,a",boost::program_options::value<std::string>()->implicit_value(""),"Manually add a new entry: unimplemented\n")
-        ("modify,m",boost::program_options::value<int>(&mModifyTicket),"Modify a database entry.\narg: Ticket number\n")
+        ("modify,m",boost::program_options::value<int>(&mModifyTicket),"Modify the address in a ticket entry.\nGenerally required when the address is malformed and the splitter can't handle it.\narg: Ticket number\n")
         ("output-dir,o",boost::program_options::value<std::string>(&mOutputDirectory)->implicit_value(mOutputDirectory.c_str()),"Directory to put the printed envelopes\n")
+        ("print-ticket-info,P",boost::program_options::value <int> (&mTicketToPrintInfoFor),"Print ticket info for any one ticket number\n")
         ("print,p",boost::program_options::value< std::vector<int> >(&mListToPrint)->multitoken(),"List of ticket numbers to print envelopes for\n(default: 0 meaning all new tickets)\n")
         ("list,l",boost::program_options::value<std::string>(&mListWhat)->implicit_value(mListWhat.c_str()),"List records in database\nall,pending,complete,local-contact\n")
         ("list-long,L",boost::program_options::value<std::string>(&mListLongWhat)->implicit_value(mListLongWhat.c_str()),"List records with description\nall,pending,complete,local-contact\n")
@@ -131,8 +133,8 @@ Session::ParseCommandLine (int argc, char **argv)
         }
         else if(mVariableMap.count("version"))
         {
-            std::cout << PACKAGE_NAME  << " Version: " << VERSION << std::endl;
-            std::cout << "Please report all bugs to: " << PACKAGE_BUGREPORT << "!!" << std::endl;
+            std::cout << ">> " << PACKAGE_NAME  << " version: " << VERSION << std::endl;
+            std::cout << ">> Please report all bugs to: " << PACKAGE_BUGREPORT << std::endl;
         }
         else 
         {
@@ -146,6 +148,12 @@ Session::ParseCommandLine (int argc, char **argv)
                 {
                     newInstance.ImportDataToDatabase();
                 }
+            }
+            else if(mVariableMap.count("print-ticket-info"))
+            {
+                ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory,mEnvelopeTemplateLocation);
+                newExportInstance.GetTicketInfoFromNumber(mTicketToPrintInfoFor);
+                newExportInstance.PrintTicketInfoFromNumber(mTicketToPrintInfoFor);
             }
             else if(mVariableMap.count("resolve"))
             {
@@ -167,7 +175,10 @@ Session::ParseCommandLine (int argc, char **argv)
                 ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
                 newExportInstance.GetTicketInfoFromNumber(mModifyTicket);
                 std::cout << "Current information:" << std::endl;
-                newExportInstance.PrintTicketInfoFromNumber(mModifyTicket);
+                newExportInstance.PrintRawTicketInfoFromNumber(mModifyTicket);
+
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                newInstance.ModifyTicketNumber(mModifyTicket);
 
             }
             else if(mVariableMap.count("update"))
@@ -189,6 +200,8 @@ Session::ParseCommandLine (int argc, char **argv)
             else if(mVariableMap.count("print"))
             {
                 ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
+                std::vector<int> temp_vector;
+
                 newExportInstance.ImportTemplate();
                 newExportInstance.SetSendersName(SendersName());
                 newExportInstance.SetSendersAddress(SendersAddress());
@@ -196,20 +209,23 @@ Session::ParseCommandLine (int argc, char **argv)
                 {
                     newExportInstance.GetPendingTicketNumbers();
                     mListToPrint = newExportInstance.PendingTicketNumbers();
-
                 }
                 for (counter = 0; counter < mListToPrint.size(); counter++)
                 {
-                    if(newExportInstance.GetTicketInfoFromNumber(mListToPrint[counter]) == -1)
-                        std::cout << "Could not find data on ticket " << mListToPrint[counter] << " in database." << std::endl;
+                    if(newExportInstance.OverlayTemplate(mListToPrint[counter]) == -1)
+                    {
+                        std::cout << "Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
+                    }
                     else
                     {
-                        if(newExportInstance.OverlayTemplate(mListToPrint[counter]) == -1)
-                        {
-                            std::cout << "Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
-                        }
+                        temp_vector.push_back(mListToPrint[counter]);
                     }
                 }
+
+                newExportInstance.CloseDatabaseConnection();
+
+                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                newInstance.ToggleTickets(temp_vector,"4"); /* mark tickets as printed */
             }
             else if(mVariableMap.count("list"))
             {

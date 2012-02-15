@@ -364,20 +364,6 @@ ImportData::ReplaceAll(std::string str, const std::string from, const std::strin
 }       /* ----- end of method ImportData::ReplaceAll  ----- */
 
 
-/*
- *--------------------------------------------------------------------------------------
- *       Class:  ImportData
- *      Method:  ImportData :: ModifyEntry
- * Description:  
- *--------------------------------------------------------------------------------------
- */
-    int
-ImportData::ModifyEntry (int ticketNumber )
-{
-    int sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
-    return 0;
-}		/* -----  end of method ImportData::ModifyEntry  ----- */
-
 
 /*
  *--------------------------------------------------------------------------------------
@@ -405,13 +391,15 @@ ImportData::ToggleTickets (std::vector <int> ticketsToToggle , std::string toSta
     {
         std::string modify_statement_template = "UPDATE FREEMEDIA SET STATUS=" + toStatusAsString + ";";
         sqlite_return_value = sqlite3_exec(mpDatabaseHandle, modify_statement_template.c_str(), dummy_callback_function, 0, &error_message);
-        std::cout << "Marked all tickets!" <<  std::endl;
         if(sqlite_return_value != SQLITE_OK)
         {
             std::cout << "Error resolving ticket number. Please file a bug.." << std::endl;
             std::cout << "SQlite error description: " << error_message << std::endl;
             sqlite3_free(error_message);
         }
+        else
+            std::cout << "Marked all tickets!" <<  std::endl;
+
     }
     else
     {
@@ -421,13 +409,14 @@ ImportData::ToggleTickets (std::vector <int> ticketsToToggle , std::string toSta
             sprintf(number_string,"%d",ticketsToToggle[i]);
             std::string modify_statement = modify_statement_template + std::string(number_string) + ";";
             sqlite_return_value = sqlite3_exec(mpDatabaseHandle, modify_statement.c_str(), dummy_callback_function, 0, &error_message);
-            std::cout << "Marked ticket #" << number_string << std::endl;
             if(sqlite_return_value != SQLITE_OK)
             {
                 std::cout << "Error resolving ticket number. Please file a bug.." << std::endl;
                 std::cout << "SQlite error description: " << error_message << std::endl;
                 sqlite3_free(error_message);
             }
+            else
+                std::cout << "Marked ticket #" << number_string << std::endl;
         }
     }
     return 0;
@@ -511,4 +500,54 @@ ImportData::PrintMalformedErrors ()
 
     return ;
 }		/* -----  end of method ImportData::PrintMalformedErrors  ----- */
+
+
+
+/*
+ *--------------------------------------------------------------------------------------
+ *       Class:  ImportData
+ *      Method:  ImportData :: ModifyTicketNumber
+ * Description:  
+ *--------------------------------------------------------------------------------------
+ */
+    void
+ImportData::ModifyTicketNumber (int ticketNumberToModify )
+{
+    std::string new_address = "";
+    char number_string[50];
+    char *error_message;
+    std::cout << ">> Enter new address.\n>> Notes: Each line is separated by a '%'.\n>> Each line should be 35 characters or less.\n>> New address [Empty cancels]: ";
+    getline(std::cin, new_address);
+    if(new_address.empty())
+    {
+        std::cout << "[+] No modifications made. Quitting." << std::endl;
+        return;
+    }
+
+    int sqlite_return_value = sqlite3_open(mDatabaseFile.c_str(), &mpDatabaseHandle);
+    if(sqlite_return_value == SQLITE_OK)
+    {
+        sprintf(number_string,"%d",ticketNumberToModify);
+        std::string query = "UPDATE FREEMEDIA SET ADDRESS_COMPLETE=\"" + new_address + "\" WHERE TICKET_NUMBER=" + number_string + ";";
+
+        sqlite_return_value = sqlite3_exec(mpDatabaseHandle, query.c_str(), dummy_callback_function, 0, &error_message);
+        if(sqlite_return_value != SQLITE_OK)
+        {
+            std::cout << "Error creating new table in database. Please file a bug.." << std::endl;
+            std::cout << "SQlite error description: " << error_message << std::endl;
+            sqlite3_free(error_message);
+            mAllGood = false;
+        }
+        sqlite3_close(mpDatabaseHandle);
+
+    }
+    else
+    {
+        std::cout << "Error connecting to/opening database. Please file a bug." << std::endl;
+        std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
+        sqlite3_close(mpDatabaseHandle);
+        mAllGood = false;
+    }
+    return ;
+}		/* -----  end of method ImportData::ModifyTicketNumber  ----- */
 
