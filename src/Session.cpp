@@ -73,7 +73,7 @@ Session::Session ()
         ("import,i",boost::program_options::value<std::string>(&mInputReportFileLocation)->implicit_value(mInputReportFileLocation.c_str()),"Import data\nOptional argument: Complete input file path\n")
         ("resolve,r",boost::program_options::value<std::vector <int> >(&mResolveTicketNumbers)->multitoken(),"Change status of provided ticket numbers to RESOLVED\n(default: 0 meaning all new tickets)\n")
         ("reset,e",boost::program_options::value<std::vector <int> >(&mResetTicketNumbers)->multitoken(),"Change status of provided ticket numbers to PENDING\n(default: 0 meaning all fixed tickets)\n")
-        ("assign-to-lc,A",boost::program_options::value<std::vector <int> >(&mAssignLCNumbers)->multitoken(),"Assign these tickets to a Local Contact\n(default: 0 meaning all)\n)")
+        ("assign-to-lc,A",boost::program_options::value<std::vector <int> >(&mAssignLCNumbers)->multitoken(),"Assign these tickets to a Local Contact\n(default: 0 meaning all)\n")
         ("force,f",boost::program_options::value<std::string>()->implicit_value(""),"Force import even if the ticket exists in database\n")
         ("add-new,a",boost::program_options::value<std::string>()->implicit_value(""),"Manually add a new entry: unimplemented\n")
         ("modify,m",boost::program_options::value<int>(&mModifyTicket),"Modify the address in a ticket entry.\nGenerally required when the address is malformed and the splitter can't handle it.\narg: Ticket number\n")
@@ -209,12 +209,17 @@ Session::ParseCommandLine (int argc, char **argv)
                 {
                     newExportInstance.GetPendingTicketNumbers();
                     mListToPrint = newExportInstance.PendingTicketNumbers();
+                    if(mListToPrint.size() == 0)
+                    {
+                        std::cout << "[++] There are no pending tickets!" << std::endl;
+                        return 0;
+                    }
                 }
                 for (counter = 0; counter < mListToPrint.size(); counter++)
                 {
                     if(newExportInstance.OverlayTemplate(mListToPrint[counter]) == -1)
                     {
-                        std::cout << "Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
+                        std::cout << "[X] Error printing envelope for ticket number: " << mListToPrint[counter] << std::endl;
                     }
                     else
                     {
@@ -224,8 +229,13 @@ Session::ParseCommandLine (int argc, char **argv)
 
                 newExportInstance.CloseDatabaseConnection();
 
-                ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
-                newInstance.ToggleTickets(temp_vector,"4"); /* mark tickets as printed */
+                if(temp_vector.size() != 0)
+                {
+                    ImportData newInstance(mInputReportFileLocation,mDatabaseFileLocation);
+                    newInstance.ToggleTickets(temp_vector,"4"); /* mark tickets as printed */
+                }
+                else
+                    std::cout << "[+] No envelopes printed" << std::endl;
             }
             else if(mVariableMap.count("list"))
             {

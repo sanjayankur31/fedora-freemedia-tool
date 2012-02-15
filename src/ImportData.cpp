@@ -536,7 +536,6 @@ ImportData::ModifyTicketNumber (int ticketNumberToModify )
             std::cout << "Error creating new table in database. Please file a bug.." << std::endl;
             std::cout << "SQlite error description: " << error_message << std::endl;
             sqlite3_free(error_message);
-            mAllGood = false;
         }
         sqlite3_close(mpDatabaseHandle);
 
@@ -546,7 +545,6 @@ ImportData::ModifyTicketNumber (int ticketNumberToModify )
         std::cout << "Error connecting to/opening database. Please file a bug." << std::endl;
         std::cout << "SQlite error description: " << sqlite3_errmsg(mpDatabaseHandle) << std::endl;
         sqlite3_close(mpDatabaseHandle);
-        mAllGood = false;
     }
     return ;
 }		/* -----  end of method ImportData::ModifyTicketNumber  ----- */

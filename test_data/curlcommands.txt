@@ -1,4 +1,0 @@
-C:\Users\ankusinha\Downloads\curl-7.23.1-ssl-sspi-zlib-static-bin-w32>curl.exe -u ankursinha:FeDoRa143! https://fedorahosted.org/freemedia/login -k -c cookiejar
-
-C:\Users\ankusinha\Downloads\curl-7.23.1-ssl-sspi-zlib-static-bin-w32>curl.exe "https://fedorahosted.org/freemedia/report/7?asc=1&format=csv&USER=ankursinha" -k -b cookiejar
-

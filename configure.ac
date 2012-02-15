@@ -1,13 +1,9 @@
 dnl Configure.ac for fedora-freemedia-tools
 dnl
-dnl TODOs: 
-dnl - correct url
-dnl - change test.cpp to main.cpp in srcdir
-dnl
 dnl Copyright Ankur Sinha: Franciscod 2011
 
 
-AC_INIT([fedora-freemedia-tools],[0.1-alpha],[sanjay DOT ankur AT gmail DOT com],fedora-freemedia-tool, [https://gitorious.org/fedora-freemedia-tool])
+AC_INIT([fedora-freemedia-tools],[0.2-alpha],[sanjay DOT ankur AT gmail DOT com],fedora-freemedia-tool, [https://gitorious.org/fedora-freemedia-tool])
 AM_INIT_AUTOMAKE([-W -Wall -Werror dist-bzip2 dist-zip check-news])
 PACKAGE=ffmt
 AC_CONFIG_SRCDIR([src/main.cpp])
