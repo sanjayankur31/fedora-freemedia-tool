@@ -100,6 +100,8 @@ class Session
     std::string mSendersName;
     std::string mListWhat;
     std::string mListLongWhat;
+    std::string mTemplateLanguageChoice;
+    std::string mTemplateBaseDir;
     std::string mEnvelopeTemplateLocation;
     std::vector<int> mListToPrint;
     std::vector<int> mResolveTicketNumbers;

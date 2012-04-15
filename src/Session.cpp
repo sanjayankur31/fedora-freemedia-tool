@@ -23,11 +23,15 @@
  *
  *        Version:  1.0
  *        Created:  07/01/12 14:20:04
- *       Revision:  1
+ *       Revision:  2
  *       Compiler:  g++
  *
  *         Author:  Ankur Sinha (FranciscoD), sanjay DOT ankur AT gmail DOT com
  *        Company:  None
+ *
+ *        Changelog:
+ *        20120415 Ankur Sinha
+ *        - Add option to select templates
  *
  * =====================================================================================
  */
@@ -53,7 +57,9 @@ Session::Session ()
     mUserDataDirectory = home_dir + "/" + ".local/share/fedora-freemedia-tool/";
     mDatabaseFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/freemedia-database.db";
     mInputReportFileLocation = home_dir + "/.local/share/fedora-freemedia-tool/report.csv";
-    mEnvelopeTemplateLocation = DATADIR "/fedora-freemedia-tool/Freemedia-mailer.png";
+    mTemplateLanguageChoice = "EN";
+    mTemplateBaseDir = DATADIR "/fedora-freemedia-tool/";
+    mEnvelopeTemplateLocation = mTemplateBaseDir + "Freemedia-mailer_" + mTemplateLanguageChoice + ".png";
     mSendersName = "Free media contributors name comes here!";
     mSendersAddress = "Address with %precent sign as %line break comes here!%";
     mListWhat = "all";
@@ -86,6 +92,7 @@ Session::Session ()
         ("v-level,v",boost::program_options::value<int>(&mVerboseLevel)->implicit_value(mVerboseLevel),"Debug level: 1,2,3\n")
         ("sender-name,n",boost::program_options::value<std::string>(&mSendersName)->multitoken(),"Senders name\n")
         ("sender-add,s",boost::program_options::value<std::string>(&mSendersAddress)->multitoken(),"Senders address\nUse % as a line limiter\n")
+        ("template language,T",boost::program_options::value<std::string>(&mTemplateLanguageChoice)->implicit_value(mTemplateLanguageChoice.c_str()),"Template language: EN(English, default) or HR(Hungarian)\n")
         ("template,t",boost::program_options::value<std::string>(&mEnvelopeTemplateLocation)->implicit_value(mEnvelopeTemplateLocation.c_str()),"Location of envelope template\n")
         ("version,V",boost::program_options::value<std::string>()->implicit_value(""),"Package information: version etc.")
         ;
@@ -199,6 +206,10 @@ Session::ParseCommandLine (int argc, char **argv)
             }
             else if(mVariableMap.count("print"))
             {
+
+                /*  Ensure that the location is updated after options are
+                 *  parsed */
+                mEnvelopeTemplateLocation = mTemplateBaseDir + "Freemedia-mailer_" + mTemplateLanguageChoice + ".png";
                 ExportData newExportInstance(mDatabaseFileLocation,mOutputDirectory, mEnvelopeTemplateLocation);
                 std::vector<int> temp_vector;
 
@@ -347,7 +358,6 @@ Session::VerboseLevel ( )
     return mVerboseLevel;
 }		/* -----  end of method Session::VerboseLevel  ----- */
 
-
     int
 Session::PrepareSession ( )
 {
@@ -478,7 +488,6 @@ Session::SendersAddress ( )
 {
     return mSendersAddress;
 }		/* -----  end of method Session::SendersAddress  ----- */
-
 
 
 /*

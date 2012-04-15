@@ -70,8 +70,6 @@ class ExportData
     void PrintLocalContactTickets();
     void PrintCompleteTickets();
     std::vector<int> PendingTicketNumbers();
-
-    /* ====================  MUTATORS      ======================================= */
     void GetAllTicketNumbers();
     void GetPendingTicketNumbers();
     void GetCompleteTicketNumbers();
@@ -85,9 +83,10 @@ class ExportData
     void PrintRawTicketInfoFromNumber(int ticketNumber);
     void ImportTemplate();
     int OverlayTemplate(int ticketNumber);
+    std::string OutputDirectory();
+    /* ====================  MUTATORS      ======================================= */
     void SetSendersAddress(std::string sendersAddress);
     void SetSendersName(std::string sendersName);
-    std::string OutputDirectory();
     void CloseDatabaseConnection();
 
     /* ====================  OPERATORS     ======================================= */
